@@ -29,21 +29,21 @@ The app must display these 3 tiers. Toggle between **Monthly** and **Yearly** (Y
 *To be generated using Nano Banana 3 Pro or Veo3.*
 * **Aesthetic:** "German Engineering" – Precise, Dark Mode, Electric Blue & Slate Grey.
 * **Logo:** Minimalist isometric server block transforming into a shield.
-* **Hero Video:** Drone shot flying over a digital map of Germany -> Splitting into two glowing data beams landing in **Nürnberg** and **Falkenstein** -> Rack close-up.
+* **Hero Video:** Drone shot flying over a digital map of Germany -> Landing on a glowing data center hub -> Rack close-up.
 * **Social Banner:** Futuristic datacenter, depth of field, blue LEDs.
 
 ### C. Copywriting Key Points
-* **Geo-Redundancy:** "Unkillable Uptime. Your site runs across **Nürnberg and Falkenstein** simultaneously."
+* **Geo-Redundancy:** "Unkillable Uptime. Your site runs across multiple physical availability zones."
 * **Cost Certainty:** "No metering. No surprise bills. Just flat pricing."
-* **Data Sovereignty:** "100% German Infrastructure. ISO 27001 Certified Data Centers."
+* **Data Sovereignty:** "**Serverstandort Deutschland**. ISO 27001 Certified."
 
 ### D. Copywriting Tone (Strict Guidelines)
-* **Do:** Be direct, professional, confident. Use technical terms correctly (Kubernetes, NVMe, SSR, Geo-Redundancy).
-* **Don't:** Use marketing fluff ("Skyrocket your business", "Game changer", "Best in class"). Keep it grounded and factual.
+* **Do:** Be direct, professional, confident. Use technical terms correctly (Kubernetes, NVMe, SSR).
+* **Don't:** Use marketing fluff or mention specific provider names (Hetzner/Netcup). Focus on the value: "German Location".
 
 ### E. Legal & SEO (German Market)
 * **Impressum:** Mandatory legal notice.
-* **Datenschutz:** Privacy Policy (Must mention Stripe US transfer & Hetzner locations).
+* **Datenschutz:** Privacy Policy.
 * **AGB:** Terms of Service (Specifically covering the 1€ domain cancellation policy).
 * **SEO:** Hreflang tags required for `/de`, `/en`, `/hr`.
 
@@ -58,24 +58,48 @@ The app must display these 3 tiers. Toggle between **Monthly** and **Yearly** (Y
 * **Config:** `spf13/viper`.
 * **Database:** `go.mongodb.org/mongo-driver/v2`.
 
-### B. Configuration
+### B. Architecture: Service/Repository Pattern
+**Strict Rule:** Handlers are thin. Services hold logic. Repos wrap DB calls.
+
+**Directory Structure:**
+```text
+internal/
+├── handler/       # HTTP/JSON parsing, Validation, calls Service
+├── service/       # Business Logic (Calculations, Stripe calls)
+└── repo/          # Database Access (Mongo Driver wrappers)
+````
+
+**1. Repository Layer (`internal/repo`)**
+Only implement methods that are actually used.
+
+  * `repo.CartRepo`: `FindOne`, `ReplaceOne`
+  * `repo.OrderRepo`: `InsertOne`
+  * *Signature Example:* `func (r *CartRepo) FindOne(ctx context.Context, filter interface{}) (*model.Cart, error)`
+
+**2. Service Layer (`internal/service`)**
+Holds the use cases.
+
+  * `service.CartService`: `AddItemToCart`, `RemoveItem`, `GetCartTotal`
+  * `service.OrderService`: `CreateOrderFromCart`
+  * *Example:* `AddItemToCart` calls `repo.CartRepo.FindOne`, updates struct, calls `repo.CartRepo.ReplaceOne`.
+
+**3. Handler Layer (`internal/handler`)**
+
+  * Parses JSON body.
+  * Calls `service.CartService.AddItemToCart`.
+  * Returns JSON response.
+
+### C. Configuration
+
 Load from Environment Variables (injected by K8s Secrets).
+
 ```go
 type Config struct {
     Port         string `mapstructure:"PORT"`
     MongoURI     string `mapstructure:"MONGODB_URI"`
-    StripeSecret string `mapstructure:"STRIPE_SECRET"` // SK_LIVE_...
+    StripeSecret string `mapstructure:"STRIPE_SECRET"`
 }
-````
-
-### C. Stripe Implementation
-
-The Go backend handles the **Checkout Session Creation**.
-
-  * **Endpoint:** `POST /api/checkout`
-  * **Payload:** `{ planId: "node-starter", interval: "yearly", domain: true }`
-  * **Response:** `{ sessionId: "cs_test_..." }`
-  * **Webhook:** Handle `checkout.session.completed` to provision the K8s namespace.
+```
 
 ### D. Build Strategy (`ko`)
 
@@ -103,11 +127,11 @@ builds:
   * **Forms:** TanStack Form + Zod.
   * **I18n:** `i18next` + `react-i18next`.
 
-### B. I18n Strategy (Path-Based)
+### B. User Flow
 
-  * **Structure:** `app/routes/$locale/index.tsx`
-  * **Locales:** `de` (default), `en`, `hr`.
-  * **Detection:** Middleware or Edge logic to redirect root `/` to `/$locale` based on `Accept-Language`.
+1.  **Pricing Page:** User clicks "Add to Cart" on a plan.
+2.  **Cart Drawer/Page:** User reviews selection, toggles "Monthly/Yearly", adds ".de Domain".
+3.  **Checkout:** User clicks "Checkout" -\> Redirects to Stripe.
 
 ### C. Dockerfile (Multi-Stage)
 
@@ -121,7 +145,6 @@ WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci
 COPY . .
-# Public Key for Stripe Elements
 ENV VITE_STRIPE_PUBLIC_KEY="pk_live_..."
 RUN npm run build
 
@@ -180,20 +203,10 @@ spec:
 
 -----
 
-## 6\. Development Workflow (Instructions for Agent)
+## 6\. Definition of Done
 
-1.  **Backend Dev:**
-      * Run: `go run cmd/api/main.go serve`
-      * Listens on: `localhost:8080`
-2.  **Frontend Dev:**
-      * Run: `cd web && npm run dev`
-      * Listens on: `localhost:3000`
-      * **Proxy Note:** Configure Vite proxy in `web/app.config.ts` to forward `/api` requests to `localhost:8080` to avoid CORS during dev.
-
-## 7\. Definition of Done
-
-1.  **Repo:** Organized as Polyrepo (Root Go, /web Node).
-2.  **Images:** Go built with `ko`, Web built with Docker.
-3.  **Flow:** User visits `dysv.de/de` -\> Clicks "Kaufen" -\> Go creates Stripe Session -\> User pays -\> Success Page.
-4.  **Content:** "Nürnberg & Falkenstein" mentioned in Hero and Features.
+1.  **Architecture:** Go code follows `handler -> service -> repo` pattern cleanly.
+2.  **Shopping Flow:** Functional "Add to Cart" -\> "View Cart" -\> "Checkout" flow.
+3.  **Images:** Go built with `ko`, Web built with Docker.
+4.  **Content:** Hero section says "**Serverstandort Deutschland**" (No Hetzner mentions).
 5.  **SEO:** `curl -I https://dysv.de/hr` shows correct Hreflang headers.
