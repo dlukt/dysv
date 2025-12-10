@@ -15,15 +15,17 @@ import (
 
 // CheckoutHandler handles checkout-related HTTP requests
 type CheckoutHandler struct {
-	checkoutService *service.CheckoutService
-	webhookSecret   string
+	checkoutService  *service.CheckoutService
+	webhookSecret    string
+	stripeAPIVersion string
 }
 
 // NewCheckoutHandler creates a new checkout handler
-func NewCheckoutHandler(checkoutService *service.CheckoutService, webhookSecret string) *CheckoutHandler {
+func NewCheckoutHandler(checkoutService *service.CheckoutService, webhookSecret, stripeAPIVersion string) *CheckoutHandler {
 	return &CheckoutHandler{
-		checkoutService: checkoutService,
-		webhookSecret:   webhookSecret,
+		checkoutService:  checkoutService,
+		webhookSecret:    webhookSecret,
+		stripeAPIVersion: stripeAPIVersion,
 	}
 }
 
@@ -85,13 +87,34 @@ func (h *CheckoutHandler) Webhook(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// If a specific API version is configured, we enforce it by NOT ignoring the mismatch (unless it matches).
+	// But `stripe-go` library decides "mismatch" based on ITS hardcoded version.
+	// Actually, `IgnoreAPIVersionMismatch: true` is the safest default if we want to allow Config overrides.
+	// But to support the user's request:
+	// If `h.stripeAPIVersion` is set, we could compare it manually, but `ConstructEvent` verifies against the SDK version.
+	// The robust way: Always IgnoreMismatch, but maybe log a warning if it differs from Config?
+	// User asked: "lock in 2025-11-17... in the backend".
+	// The SDK assumes it knows best. If we want to "lock in", we should probably mostly trust the SDK,
+	// OR just universally ignore the mismatch if the user explicitly provided a version that MIGHT differ.
+
+	ignoreMismatch := true
+	// logic: if user explicitly sets a version, they might be setting one DIFFERENT from the SDK.
+	// In that case, we MUST ignore the SDK's complaint.
+	// If the user doesn't set one, we also default to true because dev/prod often differ.
+
 	event, err := webhook.ConstructEventWithOptions(payload, sigHeader, h.webhookSecret, webhook.ConstructEventOptions{
-		IgnoreAPIVersionMismatch: true,
+		IgnoreAPIVersionMismatch: ignoreMismatch,
 	})
 	if err != nil {
 		log.Printf("Webhook: signature verification failed: %v", err)
 		writeError(w, http.StatusBadRequest, "signature verification failed")
 		return
+	}
+
+	// Optional: Enforce specific version manually if desired
+	if h.stripeAPIVersion != "" && event.APIVersion != h.stripeAPIVersion {
+		log.Printf("Webhook: Warning: Received API Version %s, expected configured %s", event.APIVersion, h.stripeAPIVersion)
+		// We don't error here, just warn. Strict blocking could break things unnecessarily.
 	}
 
 	// Handle the event

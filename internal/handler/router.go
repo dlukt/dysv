@@ -51,7 +51,7 @@ func NewRouter(cfg *config.Config) http.Handler {
 			successURL := cfg.BaseURL + "/checkout/success"
 			cancelURL := cfg.BaseURL + "/cart"
 			checkoutService := service.NewCheckoutService(cartService, orderRepo, cfg.StripeSecret, successURL, cancelURL)
-			checkoutHandler = NewCheckoutHandler(checkoutService, cfg.StripeWebhookSecret)
+			checkoutHandler = NewCheckoutHandler(checkoutService, cfg.StripeWebhookSecret, cfg.StripeAPIVersion)
 		}
 	}
 

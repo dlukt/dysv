@@ -19,6 +19,7 @@ type Config struct {
 	StripeSecret        string        `mapstructure:"STRIPE_SECRET"`
 	StripePubKey        string        `mapstructure:"STRIPE_PUBLIC_KEY"`
 	StripeWebhookSecret string        `mapstructure:"STRIPE_WEBHOOK_SECRET"`
+	StripeAPIVersion    string        `mapstructure:"STRIPE_API_VERSION"`
 }
 
 // Load reads configuration from environment variables
@@ -45,6 +46,7 @@ func Load() (*Config, error) {
 		StripeSecret:        viper.GetString("STRIPE_SECRET"),
 		StripePubKey:        viper.GetString("STRIPE_PUBLIC_KEY"),
 		StripeWebhookSecret: viper.GetString("STRIPE_WEBHOOK_SECRET"),
+		StripeAPIVersion:    viper.GetString("STRIPE_API_VERSION"),
 	}
 
 	return cfg, nil
