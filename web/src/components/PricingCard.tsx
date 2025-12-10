@@ -1,13 +1,14 @@
 // Glassmorphism pricing card component
 
 import { Check } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
+
 import { Button } from '@/components/ui/button'
 import type { Plan } from '@/data/pricing-data'
 import {
   calculateYearlyPrice,
   getYearlyMonthlyEquivalent,
 } from '@/data/pricing-data'
-import { useTranslation } from '@/lib/i18n'
 
 interface PricingCardProps {
   plan: Plan
@@ -40,7 +41,7 @@ export function PricingCard({
     >
       {isPopular && (
         <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 bg-gradient-to-r from-cyan-500 to-blue-500 text-white text-xs font-semibold rounded-full">
-          {t.pricing.card.popular}
+          {t('pricing.card.popular')}
         </div>
       )}
 
@@ -54,11 +55,11 @@ export function PricingCard({
           <span className="text-4xl font-black text-white">
             €{displayPrice.toFixed(2)}
           </span>
-          <span className="text-slate-400">{t.pricing.card.per_month}</span>
+          <span className="text-slate-400">{t('pricing.card.per_month')}</span>
         </div>
         {isYearly && (
           <p className="text-sm text-cyan-400 mt-1">
-            €{totalYearly.toFixed(2)}{t.pricing.card.per_year} ({t.pricing.card.free_months})
+            €{totalYearly.toFixed(2)}{t('pricing.card.per_year')} ({t('pricing.card.free_months')})
           </p>
         )}
       </div>
@@ -82,7 +83,7 @@ export function PricingCard({
         variant="outline"
         className="w-full border-slate-600 hover:border-cyan-500 hover:text-cyan-400"
       >
-        {t.pricing.card.add_to_cart}
+        {t('pricing.card.add_to_cart')}
       </Button>
     </div>
   )

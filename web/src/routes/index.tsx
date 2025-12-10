@@ -7,48 +7,49 @@ import {
   Clock,
   ArrowRight,
 } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 
 import { Button } from '@/components/ui/button'
-import { useTranslation } from '@/lib/i18n'
 
 export const Route = createFileRoute('/')({
   component: LandingPage,
 })
 
 export function LandingPage() {
-  const { t, locale } = useTranslation()
+  const { t, i18n } = useTranslation()
+  const locale = i18n.language
   const pricingPath = locale === 'de' ? '/pricing' : `/${locale}/pricing`
 
   const features = [
     {
       icon: <Server className="w-10 h-10 text-cyan-400" />,
-      title: t.landing.features.server_title,
-      description: t.landing.features.server_desc,
+      title: t('landing.features.server_title'),
+      description: t('landing.features.server_desc'),
     },
     {
       icon: <Shield className="w-10 h-10 text-cyan-400" />,
-      title: t.landing.features.k8s_title,
-      description: t.landing.features.k8s_desc,
+      title: t('landing.features.k8s_title'),
+      description: t('landing.features.k8s_desc'),
     },
     {
       icon: <Zap className="w-10 h-10 text-cyan-400" />,
-      title: t.landing.features.nvme_title,
-      description: t.landing.features.nvme_desc,
+      title: t('landing.features.nvme_title'),
+      description: t('landing.features.nvme_desc'),
     },
     {
       icon: <Globe className="w-10 h-10 text-cyan-400" />,
-      title: t.landing.features.geo_title,
-      description: t.landing.features.geo_desc,
+      title: t('landing.features.geo_title'),
+      description: t('landing.features.geo_desc'),
     },
     {
       icon: <Clock className="w-10 h-10 text-cyan-400" />,
-      title: t.landing.features.pricing_title,
-      description: t.landing.features.pricing_desc,
+      title: t('landing.features.pricing_title'),
+      description: t('landing.features.pricing_desc'),
     },
     {
       icon: <Shield className="w-10 h-10 text-cyan-400" />,
-      title: t.landing.features.ssl_title,
-      description: t.landing.features.ssl_desc,
+      title: t('landing.features.ssl_title'),
+      description: t('landing.features.ssl_desc'),
     },
   ]
 
@@ -59,20 +60,20 @@ export function LandingPage() {
         <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/5 via-blue-500/5 to-purple-500/5" />
         <div className="relative max-w-4xl mx-auto">
           <p className="text-cyan-400 font-mono text-sm mb-4 tracking-widest uppercase">
-            {t.landing.hero.surtitle}
+            {t('landing.hero.surtitle')}
           </p>
           <h1 className="text-5xl md:text-7xl font-black text-white mb-6 leading-tight">
             <span className="bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent">
-              {t.landing.hero.title_line1}
+              {t('landing.hero.title_line1')}
             </span>
             <br />
-            {t.landing.hero.title_line2}
+            {t('landing.hero.title_line2')}
           </h1>
           <p className="text-xl md:text-2xl text-slate-300 mb-4 max-w-2xl mx-auto">
-            {t.landing.hero.subtitle}
+            {t('landing.hero.subtitle')}
           </p>
           <p className="text-lg text-slate-400 mb-6 max-w-xl mx-auto">
-            {t.landing.hero.description}
+            {t('landing.hero.description')}
           </p>
 
           {/* Framework Logos/Names - Keeping English/Technical terms */}
@@ -94,11 +95,11 @@ export function LandingPage() {
                 size="lg"
                 className="bg-cyan-500 hover:bg-cyan-600 text-white shadow-lg shadow-cyan-500/30 px-8"
               >
-                {t.landing.hero.cta}
+                {t('landing.hero.cta')}
                 <ArrowRight className="w-5 h-5 ml-2" />
               </Button>
             </Link>
-            <p className="text-slate-500 text-sm">{t.landing.hero.starting_at}</p>
+            <p className="text-slate-500 text-sm">{t('landing.hero.starting_at')}</p>
           </div>
         </div>
       </section>
@@ -108,15 +109,15 @@ export function LandingPage() {
         <div className="max-w-5xl mx-auto flex flex-wrap items-center justify-center gap-8 md:gap-16 text-center">
           <div>
             <p className="text-2xl font-bold text-white">99.9%</p>
-            <p className="text-xs text-slate-500 uppercase tracking-wide">{t.landing.trust.sla}</p>
+            <p className="text-xs text-slate-500 uppercase tracking-wide">{t('landing.trust.sla')}</p>
           </div>
           <div>
             <p className="text-2xl font-bold text-white">🇩🇪</p>
-            <p className="text-xs text-slate-500 uppercase tracking-wide">{t.landing.trust.location}</p>
+            <p className="text-xs text-slate-500 uppercase tracking-wide">{t('landing.trust.location')}</p>
           </div>
           <div>
             <p className="text-2xl font-bold text-white">GDPR</p>
-            <p className="text-xs text-slate-500 uppercase tracking-wide">{t.landing.trust.compliant}</p>
+            <p className="text-xs text-slate-500 uppercase tracking-wide">{t('landing.trust.compliant')}</p>
           </div>
         </div>
       </section>
@@ -125,10 +126,10 @@ export function LandingPage() {
       <section className="py-20 px-6 max-w-7xl mx-auto">
         <div className="text-center mb-16">
           <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
-            {t.landing.dev_section.title}
+            {t('landing.dev_section.title')}
           </h2>
           <p className="text-lg text-slate-400 max-w-2xl mx-auto">
-            {t.landing.dev_section.description}
+            {t('landing.dev_section.description')}
           </p>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -151,17 +152,17 @@ export function LandingPage() {
       <section className="py-20 px-6">
         <div className="max-w-4xl mx-auto text-center bg-gradient-to-r from-cyan-500/10 to-blue-500/10 border border-cyan-500/20 rounded-2xl p-12">
           <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
-            {t.landing.cta_section.title}
+            {t('landing.cta_section.title')}
           </h2>
           <p className="text-lg text-slate-300 mb-8 max-w-xl mx-auto">
-            {t.landing.cta_section.description}
+            {t('landing.cta_section.description')}
           </p>
           <Link to={pricingPath}>
             <Button
               size="lg"
               className="bg-cyan-500 hover:bg-cyan-600 text-white shadow-lg shadow-cyan-500/30 px-10"
             >
-              {t.landing.cta_section.button}
+              {t('landing.cta_section.button')}
             </Button>
           </Link>
         </div>
@@ -171,7 +172,7 @@ export function LandingPage() {
       <footer className="py-12 px-6 border-t border-slate-700/50">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="text-slate-400 text-sm">
-            © 2025 dysv.de. {t.landing.footer.rights}
+            © 2025 dysv.de. {t('landing.footer.rights')}
           </div>
           <nav className="flex items-center gap-6 text-sm">
             <Link to="/impressum" className="text-slate-400 hover:text-white transition-colors">

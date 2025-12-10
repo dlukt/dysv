@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import { useStore } from '@tanstack/react-store'
 import { ArrowLeft, Trash2, CreditCard } from 'lucide-react'
-import { useTranslation } from '@/lib/i18n'
+import { useTranslation } from 'react-i18next'
 import { useAuth } from '@/hooks/use-auth'
 
 import { Button } from '@/components/ui/button'
@@ -25,7 +25,8 @@ export function CartPage() {
   const { user } = useAuth()
   const navigate = useNavigate()
 
-  const { t, locale } = useTranslation()
+  const { t, i18n } = useTranslation()
+  const locale = i18n.language
   const pricingPath = locale === 'de' ? '/pricing' : `/${locale}/pricing`
 
   // Derived state for display
@@ -39,7 +40,7 @@ export function CartPage() {
     return {
       ...item,
       name: details?.name || item.id,
-      description: item.type === 'plan' ? (details as { limits: string } | undefined)?.limits : t.cart.domain_reg,
+      description: item.type === 'plan' ? (details as { limits: string } | undefined)?.limits : t('cart.domain_reg'),
       unitPrice: details?.monthlyPrice || 0,
     }
   })
@@ -190,12 +191,12 @@ export function CartPage() {
       <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center">
         <div className="text-center px-6">
           <h1 className="text-3xl font-bold text-white mb-4">
-            {t.cart.empty.title}
+            {t('cart.empty.title')}
           </h1>
-          <p className="text-slate-400 mb-8">{t.cart.empty.description}</p>
+          <p className="text-slate-400 mb-8">{t('cart.empty.description')}</p>
           <Link to={pricingPath}>
             <Button className="bg-cyan-500 hover:bg-cyan-600 text-white">
-              {t.cart.empty.button}
+              {t('cart.empty.button')}
             </Button>
           </Link>
         </div>
@@ -212,10 +213,10 @@ export function CartPage() {
             className="inline-flex items-center gap-2 text-slate-400 hover:text-white transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
-            {t.cart.back}
+            {t('cart.back')}
           </Link>
         </div>
-        <h1 className="text-3xl font-bold text-white mb-8">{t.cart.title}</h1>
+        <h1 className="text-3xl font-bold text-white mb-8">{t('cart.title')}</h1>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Cart Items List */}
@@ -232,7 +233,7 @@ export function CartPage() {
                   <p className="text-sm text-slate-400">{item.description}</p>
                   {isYearly && item.type === 'plan' && (
                     <p className="text-sm text-cyan-400 mt-1">
-                      {t.cart.billed_yearly}
+                      {t('cart.billed_yearly')}
                     </p>
                   )}
                 </div>
@@ -281,17 +282,17 @@ export function CartPage() {
           <div className="lg:col-span-1">
             <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700 rounded-xl p-6 sticky top-6">
               <h2 className="text-lg font-semibold text-white mb-4">
-                {t.cart.summary.title}
+                {t('cart.summary.title')}
               </h2>
 
               <div className="space-y-3 mb-6">
                 <div className="flex justify-between text-slate-400">
-                  <span>{t.cart.summary.subtotal}</span>
+                  <span>{t('cart.summary.subtotal')}</span>
                   <span>€{monthlyTotal.toFixed(2)}/mo</span>
                 </div>
                 {isYearly && (
                   <div className="flex justify-between text-cyan-400 text-sm">
-                    <span>{t.cart.summary.yearly_discount}</span>
+                    <span>{t('cart.summary.yearly_discount')}</span>
                     <span>
                       -€
                       {(monthlyTotal * 12 - yearlyTotal).toFixed(2)}
@@ -300,7 +301,7 @@ export function CartPage() {
                   </div>
                 )}
                 <div className="border-t border-slate-700 pt-3 flex justify-between text-white font-semibold">
-                  <span>{t.cart.summary.total}</span>
+                  <span>{t('cart.summary.total')}</span>
                   <div className="text-right">
                     <p>€{monthlyTotal.toFixed(2)}/mo</p>
                     {isYearly && (
@@ -318,11 +319,11 @@ export function CartPage() {
                 className="w-full bg-cyan-500 hover:bg-cyan-600 text-white shadow-lg shadow-cyan-500/30"
               >
                 <CreditCard className="w-5 h-5 mr-2" />
-                {t.cart.summary.checkout}
+                {t('cart.summary.checkout')}
               </Button>
 
               <p className="text-xs text-slate-500 text-center mt-4">
-                {t.cart.summary.redirect}
+                {t('cart.summary.redirect')}
               </p>
             </div>
           </div>

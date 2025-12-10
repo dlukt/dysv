@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { createFileRoute, useNavigate, Link } from '@tanstack/react-router'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { Loader2, Check } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { useAuth } from '@/hooks/use-auth'
 import { Button } from '@/components/ui/button'
 import { AddressForm, type AddressFormData } from '@/components/AddressForm'
@@ -40,6 +41,7 @@ interface Address {
 }
 
 function CheckoutPage() {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const { user, isLoading: isAuthLoading } = useAuth()
   const [selectedAddressId, setSelectedAddressId] = useState<string | null>(null)
@@ -176,14 +178,14 @@ function CheckoutPage() {
         {/* Left Column: Address Selection */}
         <div className="md:col-span-2 space-y-6">
           <h1 className="text-3xl font-bold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
-            Checkout
+            {t('checkout.title')}
           </h1>
           
           <div className="bg-slate-800/50 border border-slate-700 rounded-xl p-6">
             <div className="flex justify-between items-center mb-4">
-                <h2 className="text-xl font-semibold text-white">Billing Address</h2>
+                <h2 className="text-xl font-semibold text-white">{t('checkout.billing_address')}</h2>
                 <Button variant="ghost" size="sm" onClick={() => setIsAddingAddress(!isAddingAddress)} className="text-cyan-400 hover:text-cyan-300">
-                    {isAddingAddress ? 'Cancel' : 'Add New'}
+                    {isAddingAddress ? t('checkout.cancel') : t('checkout.add_new')}
                 </Button>
             </div>
 
@@ -197,7 +199,7 @@ function CheckoutPage() {
                 <div className="space-y-3">
                     {addresses.length === 0 ? (
                         <div className="text-center py-8 text-slate-400 border border-dashed border-slate-700 rounded-lg">
-                            No addresses found. Please add one.
+                            {t('checkout.no_addresses')}
                         </div>
                     ) : (
                         addresses.map(addr => (
@@ -225,7 +227,7 @@ function CheckoutPage() {
                                             {addr.postalCode} {addr.city}, {addr.country}
                                         </div>
                                     </div>
-                                    {addr.isDefault && <span className="text-xs bg-slate-700 text-slate-300 px-2 py-1 rounded">Default</span>}
+                                    {addr.isDefault && <span className="text-xs bg-slate-700 text-slate-300 px-2 py-1 rounded">{t('checkout.default')}</span>}
                                 </div>
                             </button>
                         ))
@@ -238,7 +240,7 @@ function CheckoutPage() {
         {/* Right Column: Order Summary */}
         <div className="space-y-6">
             <div className="bg-slate-800 border border-slate-700 rounded-xl p-6 sticky top-6">
-                <h2 className="text-xl font-semibold text-white mb-4">Order Summary</h2>
+                <h2 className="text-xl font-semibold text-white mb-4">{t('checkout.summary.title')}</h2>
                 <div className="space-y-4 mb-6">
                     {cartItems.map(item => (
                         <div key={item.itemId} className="flex justify-between text-sm">
@@ -253,7 +255,7 @@ function CheckoutPage() {
                     ))}
                     <div className="border-t border-slate-700 my-4"></div>
                     <div className="flex justify-between items-center text-lg font-bold text-white">
-                        <span>Total ({cart?.billingCycle})</span>
+                        <span>{t('checkout.summary.total')} ({cart?.billingCycle})</span>
                         <span>€{currentTotal.toFixed(2)}</span>
                     </div>
                 </div>
@@ -263,12 +265,12 @@ function CheckoutPage() {
                     disabled={!selectedAddressId || checkoutMutation.isPending || isAddingAddress || cartItems.length === 0}
                     className="w-full bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-bold py-3 rounded-lg shadow-lg hover:shadow-cyan-500/25 transition-all"
                 >
-                    {checkoutMutation.isPending ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Proceed to Payment'}
+                    {checkoutMutation.isPending ? <Loader2 className="w-5 h-5 animate-spin" /> : t('checkout.summary.submit')}
                 </Button>
                 
                 <div className="text-center mt-4">
                     <Link to="/cart" className="text-sm text-slate-400 hover:text-white underline">
-                        Back to Cart
+                        {t('checkout.summary.back_to_cart')}
                     </Link>
                 </div>
             </div>

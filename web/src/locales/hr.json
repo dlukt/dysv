@@ -1,0 +1,132 @@
+{
+  "landing": {
+    "hero": {
+      "surtitle": "3-Node Redundantni Hosting",
+      "title_line1": "Unkillable",
+      "title_line2": "Uptime",
+      "subtitle": "Redundantni Kubernetes hosting za vaše statičke stranice i Node.js aplikacije.",
+      "description": "Vaša aplikacija se vrti na 3 node-a istovremeno. Ako jedan padne, ostali preuzimaju.",
+      "cta": "Pogledaj planove",
+      "starting_at": "Već od 3,90 €/mj"
+    },
+    "features": {
+      "server_title": "Serveri u Njemačkoj",
+      "server_desc": "Vaši podaci ostaju u Njemačkoj. ISO 27001 certificirani podatkovni centri sa strogom GDPR usklađenošću.",
+      "k8s_title": "Kubernetes",
+      "k8s_desc": "Enterprise infrastruktura. Auto-scaling, self-healing i zero-downtime deploymenti.",
+      "nvme_title": "NVMe Pohrana",
+      "nvme_desc": "Brzi NVMe SSD-ovi za ekstremno brzo učitavanje i optimalne performanse.",
+      "geo_title": "Geo-Redundantno",
+      "geo_desc": "Maksimalna pouzdanost. Vaša stranica radi u više fizičkih zona dostupnosti.",
+      "pricing_title": "Fiksne Cijene",
+      "pricing_desc": "Bez mjerenja prometa. Bez iznenađenja. Samo predvidljivi, transparentni mjesečni troškovi.",
+      "ssl_title": "SSL Uključen",
+      "ssl_desc": "Besplatni SSL certifikati za sve domene. Sigurno po defaultu."
+    },
+    "trust": {
+      "sla": "Uptime SLA",
+      "location": "Lokacija",
+      "compliant": "Usklađeno"
+    },
+    "dev_section": {
+      "title": "Stvoreno za Developere",
+      "description": "Deployajte Next.js ili Nuxt aplikaciju u nekoliko minuta. Mi brinemo o infrastrukturi."
+    },
+    "cta_section": {
+      "title": "Spremni za start?",
+      "description": "Započnite sa Static Micro planom za samo 3,90 €/mj. Kreditna kartica nije potrebna za setup.",
+      "button": "Odaberi Plan"
+    },
+    "footer": {
+      "rights": "Sva prava pridržana."
+    }
+  },
+  "pricing": {
+    "hero": {
+      "title": "Jednostavne Fiksne Cijene",
+      "description": "Bez mjerenja. Bez loših iznenađenja.",
+      "description_highlight": "Samo njemački inženjering."
+    },
+    "toggle": {
+      "monthly": "Mjesečno",
+      "yearly": "Godišnje",
+      "discount": "2 mjeseca gratis"
+    },
+    "domain": {
+      "title": "Trebate domenu?",
+      "description_pre": "Dodajte",
+      "description_post": "domenu za samo",
+      "price": "1,00 €/mj",
+      "label": "Dodaj .de domenu"
+    },
+    "cart_button": {
+        "view": "Vidi košaricu",
+        "item": "artikl",
+        "items": "artikala"
+    },
+    "card": {
+      "popular": "Najpopularnije",
+      "selected": "Odabrano",
+      "add_to_cart": "Dodaj u košaricu",
+      "per_month": "/mj",
+      "per_year": "/god",
+      "free_months": "2 mjeseca gratis"
+    },
+    "trust": {
+        "iso": "Certificirani DC",
+        "uptime": "Uptime SLA",
+        "location": "Lokacija Njemačka"
+    }
+  },
+  "cart": {
+    "empty": {
+      "title": "Vaša košarica je prazna",
+      "description": "Dodajte plan ili dodatak da biste započeli.",
+      "button": "Pogledaj planove"
+    },
+    "title": "Vaša Košarica",
+    "back": "Natrag na cjenik",
+    "billed_monthly": "Mjesečna naplata",
+    "billed_yearly": "Godišnja naplata",
+    "summary": {
+      "title": "Sažetak narudžbe",
+      "subtotal": "Međuzbroj",
+      "yearly_discount": "Godišnja naplata (2 mj gratis)",
+      "total": "Ukupno",
+      "checkout": "Na blagajnu",
+      "redirect": "Bit ćete preusmjereni na Stripe za plaćanje."
+    },
+    "domain_reg": "Registracija domene"
+  },
+  "checkout": {
+    "title": "Blagajna",
+    "billing_address": "Adresa naplate",
+    "add_new": "Dodaj novu",
+    "cancel": "Odustani",
+    "no_addresses": "Nema pronađenih adresa. Molimo dodajte jednu.",
+    "default": "Zadano",
+    "summary": {
+      "title": "Sažetak narudžbe",
+      "total": "Ukupno",
+      "submit": "Nastavi na plaćanje",
+      "back_to_cart": "Natrag u košaricu"
+    }
+  },
+  "address": {
+    "title": "Moje adrese",
+    "add_new": "Dodaj novu adresu",
+    "edit": "Uredi",
+    "delete": "Izbriši",
+    "set_default": "Postavi kao zadanu",
+    "default_badge": "Zadano",
+    "empty": "Nema spremljenih adresa.",
+    "delete_confirm": "Jeste li sigurni da želite izbrisati ovu adresu?",
+    "create_success": "Adresa uspješno kreirana",
+    "update_success": "Adresa uspješno ažurirana",
+    "delete_success": "Adresa uspješno izbrisana",
+    "form": {
+      "title_new": "Nova Adresa",
+      "title_edit": "Uredi Adresu"
+    }
+  }
+}

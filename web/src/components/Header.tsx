@@ -134,7 +134,7 @@ export default function Header() {
   }, [pathname])
 
   return (
-    <header className="sticky top-0 z-40 bg-slate-900/80 backdrop-blur border-b border-slate-800">
+    <header className="sticky top-0 z-40 bg-slate-950/90 backdrop-blur border-b border-slate-800">
       <div className="max-w-7xl mx-auto px-6 py-4">
         <div className="flex items-center justify-between">
           <Link to={homePath} className="text-2xl font-black text-white">

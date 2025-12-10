@@ -1,0 +1,132 @@
+{
+  "landing": {
+    "hero": {
+      "surtitle": "3-Node Redundantes Hosting",
+      "title_line1": "Unkillable",
+      "title_line2": "Uptime",
+      "subtitle": "Redundantes Kubernetes-Hosting für Ihre statischen Seiten und Node.js-Anwendungen.",
+      "description": "Ihre App läuft gleichzeitig auf 3 Nodes. Fällt einer aus, übernehmen die anderen.",
+      "cta": "Pläne ansehen",
+      "starting_at": "Ab 3,90 €/Monat"
+    },
+    "features": {
+      "server_title": "Serverstandort Deutschland",
+      "server_desc": "Ihre Daten bleiben in Deutschland. ISO 27001 zertifizierte Rechenzentren mit strenger DSGVO-Compliance.",
+      "k8s_title": "Kubernetes-Powered",
+      "k8s_desc": "Enterprise-Infrastruktur. Auto-Scaling, Self-Healing und Zero-Downtime Deployments.",
+      "nvme_title": "NVMe Speicher",
+      "nvme_desc": "Rasendschnelle NVMe SSDs für extrem kurze Ladezeiten und optimale Performance.",
+      "geo_title": "Geo-Redundant",
+      "geo_desc": "Maximale Ausfallsicherheit. Ihre Seite läuft über mehrere physische Verfügbarkeitszonen.",
+      "pricing_title": "Einfache Preise",
+      "pricing_desc": "Kein Metering. Keine Überraschungen. Nur planbare, transparente monatliche Kosten.",
+      "ssl_title": "SSL Inklusive",
+      "ssl_desc": "Kostenlose SSL-Zertifikate für alle Domains. Sicher per Default."
+    },
+    "trust": {
+      "sla": "Verfügbarkeits-SLA",
+      "location": "Serverstandort",
+      "compliant": "Konform"
+    },
+    "dev_section": {
+      "title": "Für Entwickler gebaut",
+      "description": "Deployen Sie Ihre Next.js oder Nuxt App in Minuten. Wir kümmern uns um die Infrastruktur."
+    },
+    "cta_section": {
+      "title": "Bereit zum Start?",
+      "description": "Starten Sie mit dem Static Micro Plan für nur 3,90 €/Monat. Keine Kreditkarte für Setup erforderlich.",
+      "button": "Plan auswählen"
+    },
+    "footer": {
+      "rights": "Alle Rechte vorbehalten."
+    }
+  },
+  "pricing": {
+    "hero": {
+      "title": "Einfache Pauschalpreise",
+      "description": "Keine Verbrauchmessung. Keine bösen Überraschungen.",
+      "description_highlight": "Einfach deutsche Ingenieurskunst."
+    },
+    "toggle": {
+      "monthly": "Monatlich",
+      "yearly": "Jährlich",
+      "discount": "2 Monate gratis"
+    },
+    "domain": {
+      "title": "Domain benötigt?",
+      "description_pre": "Fügen Sie eine",
+      "description_post": "Domain für nur",
+      "price": "1,00 €/Monat",
+      "label": ".de Domain hinzufügen"
+    },
+    "cart_button": {
+        "view": "Warenkorb ansehen",
+        "item": "Artikel",
+        "items": "Artikel"
+    },
+    "card": {
+      "popular": "Beliebt",
+      "selected": "Ausgewählt",
+      "add_to_cart": "In den Warenkorb",
+      "per_month": "/Monat",
+      "per_year": "/Jahr",
+      "free_months": "2 Monate gratis"
+    },
+    "trust": {
+        "iso": "Zertifiziertes Rechenzentrum",
+        "uptime": "Verfügbarkeits-SLA",
+        "location": "Serverstandort Deutschland"
+    }
+  },
+  "cart": {
+    "empty": {
+      "title": "Ihr Warenkorb ist leer",
+      "description": "Fügen Sie einen Plan oder ein Addon hinzu, um zu beginnen.",
+      "button": "Pläne ansehen"
+    },
+    "title": "Ihr Warenkorb",
+    "back": "Zurück zu den Preisen",
+    "billed_monthly": "Monatliche Abrechnung",
+    "billed_yearly": "Jährliche Abrechnung",
+    "summary": {
+      "title": "Zusammenfassung",
+      "subtotal": "Zwischensumme",
+      "yearly_discount": "Jährliche Abrechnung (2 Monate gratis)",
+      "total": "Gesamt",
+      "checkout": "Zur Kasse",
+      "redirect": "Sie werden zu Stripe weitergeleitet, um die Zahlung abzuschließen."
+    },
+    "domain_reg": "Domainregistrierung"
+  },
+  "checkout": {
+    "title": "Kasse",
+    "billing_address": "Rechnungsadresse",
+    "add_new": "Neue hinzufügen",
+    "cancel": "Abbrechen",
+    "no_addresses": "Keine Adressen gefunden. Bitte fügen Sie eine hinzu.",
+    "default": "Standard",
+    "summary": {
+      "title": "Bestellübersicht",
+      "total": "Gesamt",
+      "submit": "Zur Zahlung",
+      "back_to_cart": "Zurück zum Warenkorb"
+    }
+  },
+  "address": {
+    "title": "Meine Adressen",
+    "add_new": "Adresse hinzufügen",
+    "edit": "Bearbeiten",
+    "delete": "Löschen",
+    "set_default": "Als Standard setzen",
+    "default_badge": "Standard",
+    "empty": "Keine Adressen gefunden.",
+    "delete_confirm": "Sind Sie sicher, dass Sie diese Adresse löschen wollen?",
+    "create_success": "Adresse erfolgreich erstellt",
+    "update_success": "Adresse erfolgreich aktualisiert",
+    "delete_success": "Adresse erfolgreich gelöscht",
+    "form": {
+      "title_new": "Neue Adresse",
+      "title_edit": "Adresse bearbeiten"
+    }
+  }
+}

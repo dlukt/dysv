@@ -13,6 +13,7 @@ import TanStackQueryDevtools from '../integrations/tanstack-query/devtools'
 
 import StoreDevtools from '../lib/demo-store-devtools'
 import { getLocaleFromPath } from '../lib/locale'
+import i18n from '../lib/i18n'
 
 import appCss from '../styles.css?url'
 
@@ -86,6 +87,12 @@ function RootDocument({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     initPersistence()
   }, [])
+
+  useEffect(() => {
+    if (locale && i18n.language !== locale) {
+      i18n.changeLanguage(locale)
+    }
+  }, [locale])
 
 
   return (

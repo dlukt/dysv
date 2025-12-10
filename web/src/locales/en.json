@@ -1,0 +1,132 @@
+{
+  "landing": {
+    "hero": {
+      "surtitle": "3-Node Redundant Hosting",
+      "title_line1": "Unkillable",
+      "title_line2": "Uptime",
+      "subtitle": "Redundant Kubernetes hosting for your static sites and Node.js applications.",
+      "description": "Your app runs across 3 nodes simultaneously. If one fails, the others keep serving.",
+      "cta": "View Plans",
+      "starting_at": "Starting at €3.90/month"
+    },
+    "features": {
+      "server_title": "Server Location Germany",
+      "server_desc": "Your data stays in Germany. ISO 27001 certified datacenters with strict GDPR compliance.",
+      "k8s_title": "Kubernetes-Powered",
+      "k8s_desc": "Enterprise-grade infrastructure. Auto-scaling, self-healing, and zero-downtime deployments.",
+      "nvme_title": "NVMe Storage",
+      "nvme_desc": "Blazing fast NVMe SSDs for lightning-quick page loads and optimal performance.",
+      "geo_title": "Geo-Redundant",
+      "geo_desc": "Unkillable uptime. Your site runs across multiple physical availability zones.",
+      "pricing_title": "Flat Pricing",
+      "pricing_desc": "No metering. No surprise bills. Just predictable, transparent monthly costs.",
+      "ssl_title": "SSL Included",
+      "ssl_desc": "Free SSL certificates for all your domains. Secure by default."
+    },
+    "trust": {
+      "sla": "Uptime SLA",
+      "location": "Data Location",
+      "compliant": "Compliant"
+    },
+    "dev_section": {
+      "title": "Built for Developers",
+      "description": "Deploy your Next.js or Nuxt app in minutes. We handle the infrastructure."
+    },
+    "cta_section": {
+      "title": "Ready to Deploy?",
+      "description": "Get started with our Static Micro plan for just €3.90/month. No credit card required for setup.",
+      "button": "Choose Your Plan"
+    },
+    "footer": {
+      "rights": "All rights reserved."
+    }
+  },
+  "pricing": {
+    "hero": {
+      "title": "Simple, Flat Pricing",
+      "description": "No metering. No surprise bills.",
+      "description_highlight": "Just German engineering."
+    },
+    "toggle": {
+      "monthly": "Monthly",
+      "yearly": "Yearly",
+      "discount": "2 months free"
+    },
+    "domain": {
+      "title": "Need a domain?",
+      "description_pre": "Add a",
+      "description_post": "domain for just",
+      "price": "€1.00/month",
+      "label": "Add .de domain"
+    },
+    "cart_button": {
+        "view": "View Cart",
+        "item": "item",
+        "items": "items"
+    },
+    "card": {
+      "popular": "Most Popular",
+      "selected": "Selected",
+      "add_to_cart": "Add to Cart",
+      "per_month": "/mo",
+      "per_year": "/year",
+      "free_months": "2 months free"
+    },
+    "trust": {
+        "iso": "Certified Datacenter",
+        "uptime": "Uptime SLA",
+        "location": "Server Location Germany"
+    }
+  },
+  "cart": {
+    "empty": {
+      "title": "Your cart is empty",
+      "description": "Add a plan or addon to get started.",
+      "button": "View Plans"
+    },
+    "title": "Your Cart",
+    "back": "Back to Pricing",
+    "billed_monthly": "Monthly billing",
+    "billed_yearly": "Yearly billing",
+    "summary": {
+      "title": "Order Summary",
+      "subtotal": "Subtotal",
+      "yearly_discount": "Yearly billing (2 mo free)",
+      "total": "Total",
+      "checkout": "Proceed to Checkout",
+      "redirect": "You'll be redirected to Stripe to complete payment."
+    },
+    "domain_reg": "Domain registration"
+  },
+  "checkout": {
+    "title": "Checkout",
+    "billing_address": "Billing Address",
+    "add_new": "Add New",
+    "cancel": "Cancel",
+    "no_addresses": "No addresses found. Please add one.",
+    "default": "Default",
+    "summary": {
+      "title": "Order Summary",
+      "total": "Total",
+      "submit": "Proceed to Payment",
+      "back_to_cart": "Back to Cart"
+    }
+  },
+  "address": {
+    "title": "My Addresses",
+    "add_new": "Add New Address",
+    "edit": "Edit",
+    "delete": "Delete",
+    "set_default": "Set as Default",
+    "default_badge": "Default",
+    "empty": "No addresses found.",
+    "delete_confirm": "Are you sure you want to delete this address?",
+    "create_success": "Address created successfully",
+    "update_success": "Address updated successfully",
+    "delete_success": "Address deleted successfully",
+    "form": {
+      "title_new": "New Address",
+      "title_edit": "Edit Address"
+    }
+  }
+}
