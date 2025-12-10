@@ -9,7 +9,9 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as RegisterRouteImport } from './routes/register'
 import { Route as PricingRouteImport } from './routes/pricing'
+import { Route as LoginRouteImport } from './routes/login'
 import { Route as ImpressumRouteImport } from './routes/impressum'
 import { Route as HrRouteImport } from './routes/hr'
 import { Route as EnRouteImport } from './routes/en'
@@ -29,9 +31,19 @@ import { Route as DePricingRouteImport } from './routes/de/pricing'
 import { Route as DeCartRouteImport } from './routes/de/cart'
 import { Route as CheckoutSuccessRouteImport } from './routes/checkout/success'
 
+const RegisterRoute = RegisterRouteImport.update({
+  id: '/register',
+  path: '/register',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PricingRoute = PricingRouteImport.update({
   id: '/pricing',
   path: '/pricing',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ImpressumRoute = ImpressumRouteImport.update({
@@ -134,7 +146,9 @@ export interface FileRoutesByFullPath {
   '/en': typeof EnRouteWithChildren
   '/hr': typeof HrRouteWithChildren
   '/impressum': typeof ImpressumRoute
+  '/login': typeof LoginRoute
   '/pricing': typeof PricingRoute
+  '/register': typeof RegisterRoute
   '/checkout/success': typeof CheckoutSuccessRoute
   '/de/cart': typeof DeCartRoute
   '/de/pricing': typeof DePricingRoute
@@ -152,7 +166,9 @@ export interface FileRoutesByTo {
   '/cart': typeof CartRoute
   '/datenschutz': typeof DatenschutzRoute
   '/impressum': typeof ImpressumRoute
+  '/login': typeof LoginRoute
   '/pricing': typeof PricingRoute
+  '/register': typeof RegisterRoute
   '/checkout/success': typeof CheckoutSuccessRoute
   '/de/cart': typeof DeCartRoute
   '/de/pricing': typeof DePricingRoute
@@ -174,7 +190,9 @@ export interface FileRoutesById {
   '/en': typeof EnRouteWithChildren
   '/hr': typeof HrRouteWithChildren
   '/impressum': typeof ImpressumRoute
+  '/login': typeof LoginRoute
   '/pricing': typeof PricingRoute
+  '/register': typeof RegisterRoute
   '/checkout/success': typeof CheckoutSuccessRoute
   '/de/cart': typeof DeCartRoute
   '/de/pricing': typeof DePricingRoute
@@ -197,7 +215,9 @@ export interface FileRouteTypes {
     | '/en'
     | '/hr'
     | '/impressum'
+    | '/login'
     | '/pricing'
+    | '/register'
     | '/checkout/success'
     | '/de/cart'
     | '/de/pricing'
@@ -215,7 +235,9 @@ export interface FileRouteTypes {
     | '/cart'
     | '/datenschutz'
     | '/impressum'
+    | '/login'
     | '/pricing'
+    | '/register'
     | '/checkout/success'
     | '/de/cart'
     | '/de/pricing'
@@ -236,7 +258,9 @@ export interface FileRouteTypes {
     | '/en'
     | '/hr'
     | '/impressum'
+    | '/login'
     | '/pricing'
+    | '/register'
     | '/checkout/success'
     | '/de/cart'
     | '/de/pricing'
@@ -258,17 +282,33 @@ export interface RootRouteChildren {
   EnRoute: typeof EnRouteWithChildren
   HrRoute: typeof HrRouteWithChildren
   ImpressumRoute: typeof ImpressumRoute
+  LoginRoute: typeof LoginRoute
   PricingRoute: typeof PricingRoute
+  RegisterRoute: typeof RegisterRoute
   CheckoutSuccessRoute: typeof CheckoutSuccessRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/register': {
+      id: '/register'
+      path: '/register'
+      fullPath: '/register'
+      preLoaderRoute: typeof RegisterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/pricing': {
       id: '/pricing'
       path: '/pricing'
       fullPath: '/pricing'
       preLoaderRoute: typeof PricingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/impressum': {
@@ -451,7 +491,9 @@ const rootRouteChildren: RootRouteChildren = {
   EnRoute: EnRouteWithChildren,
   HrRoute: HrRouteWithChildren,
   ImpressumRoute: ImpressumRoute,
+  LoginRoute: LoginRoute,
   PricingRoute: PricingRoute,
+  RegisterRoute: RegisterRoute,
   CheckoutSuccessRoute: CheckoutSuccessRoute,
 }
 export const routeTree = rootRouteImport

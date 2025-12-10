@@ -6,11 +6,12 @@ import { ShoppingCart, Menu, X } from 'lucide-react'
 import { cartStore, getItemCount } from '@/lib/cart-store'
 import { getLocaleFromPath, type Locale } from '@/lib/locale'
 import { LanguageSwitcher } from './LanguageSwitcher'
+import { useAuth } from '@/hooks/use-auth'
 
-const navLabels: Record<Locale, { home: string; pricing: string; cart: string }> = {
-  de: { home: 'Startseite', pricing: 'Preise', cart: 'Warenkorb' },
-  en: { home: 'Home', pricing: 'Pricing', cart: 'Cart' },
-  hr: { home: 'Početna', pricing: 'Cjenik', cart: 'Košarica' },
+const navLabels: Record<Locale, { home: string; pricing: string; cart: string; login: string; logout: string; account: string }> = {
+  de: { home: 'Startseite', pricing: 'Preise', cart: 'Warenkorb', login: 'Anmelden', logout: 'Abmelden', account: 'Konto' },
+  en: { home: 'Home', pricing: 'Pricing', cart: 'Cart', login: 'Login', logout: 'Logout', account: 'Account' },
+  hr: { home: 'Početna', pricing: 'Cjenik', cart: 'Košarica', login: 'Prijava', logout: 'Odjava', account: 'Račun' },
 }
 
 export default function Header() {
@@ -20,12 +21,14 @@ export default function Header() {
   const { pathname } = useRouterState({ select: (state) => state.location })
   const locale = getLocaleFromPath(pathname)
   const labels = navLabels[locale] ?? navLabels.de
+  const { user, logout } = useAuth()
   
   // Logic: Default locale (de) uses root paths, others get prefixed.
   const base = locale === 'de' ? '' : `/${locale}`
   const homePath = base || '/'
   const pricingPath = `${base}/pricing`
   const cartPath = `${base}/cart`
+  const loginPath = `/login` // Login is global? Or should be localized? For now, global.
 
   // Close menu when path changes
   useEffect(() => {
@@ -48,6 +51,32 @@ export default function Header() {
       >
         {labels.pricing}
       </Link>
+      
+      {/* Auth Links */}
+      {user ? (
+        <>
+            <div className={`flex items-center gap-4 ${mobile ? 'flex-col items-start w-full' : ''}`}>
+                 <span className={`text-sm text-cyan-400 font-medium ${mobile ? 'py-1' : ''}`}>
+                    {user.username}
+                 </span>
+                 <button
+                    onClick={() => logout()}
+                    className={`text-slate-300 hover:text-white transition-colors ${mobile ? 'block py-2 text-lg w-full text-left' : ''}`}
+                 >
+                    {labels.logout}
+                 </button>
+            </div>
+        </>
+      ) : (
+        <Link
+            to={loginPath}
+            className={`hover:text-white transition-colors ${mobile ? 'block py-2 text-lg' : ''}`}
+            activeProps={{ className: `text-white ${mobile ? 'block py-2 text-lg font-semibold' : ''}` }}
+        >
+            {labels.login}
+        </Link>
+      )}
+
       <Link
         to={cartPath}
         className={`relative inline-flex items-center gap-2 rounded-lg transition-colors ${

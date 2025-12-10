@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react'
-import { createFileRoute, Link } from '@tanstack/react-router'
+import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import { useStore } from '@tanstack/react-store'
 import { ArrowLeft, Trash2, CreditCard } from 'lucide-react'
 import { useTranslation } from '@/lib/i18n'
+import { useAuth } from '@/hooks/use-auth'
 
 import { Button } from '@/components/ui/button'
 import { plans, addons } from '@/data/pricing-data'
@@ -21,6 +22,8 @@ export function CartPage() {
   const cart = useStore(cartStore)
   const isEmpty = !hasItems(cart)
   const isYearly = cart.billingCycle === 'yearly'
+  const { user } = useAuth()
+  const navigate = useNavigate()
 
   const { t, locale } = useTranslation()
   const pricingPath = locale === 'de' ? '/pricing' : `/${locale}/pricing`
@@ -157,6 +160,11 @@ export function CartPage() {
   }
 
   const handleCheckout = async () => {
+    if (!user) {
+      navigate({ to: '/login', search: { redirect: '/cart' } })
+      return
+    }
+
     try {
       const sessionId = getSessionId()
       await syncCartToBackend(sessionId)
