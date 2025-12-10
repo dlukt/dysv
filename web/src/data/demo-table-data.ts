@@ -27,6 +27,7 @@ const newPerson = (num: number): Person => {
     age: faker.number.int(40),
     visits: faker.number.int(1000),
     progress: faker.number.int(100),
+    // biome-ignore lint/style/noNonNullAssertion: Demo data
     status: faker.helpers.shuffle<Person['status']>([
       'relationship',
       'complicated',
@@ -37,6 +38,7 @@ const newPerson = (num: number): Person => {
 
 export function makeData(...lens: number[]) {
   const makeDataLevel = (depth = 0): Person[] => {
+    // biome-ignore lint/style/noNonNullAssertion: Demo data
     const len = lens[depth]!
     return range(len).map((index): Person => {
       return {

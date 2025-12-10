@@ -18,5 +18,5 @@ export function switchLocale(pathname: string, targetLocale: Locale): string {
   if (targetLocale !== 'de') {
     segments.unshift(targetLocale)
   }
-  return '/' + segments.join('/')
+  return `/${segments.join('/')}`
 }

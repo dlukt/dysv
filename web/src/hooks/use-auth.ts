@@ -15,7 +15,7 @@ export interface User {
 export interface AuthResponse {
   user: User
   token: string
-  session: any
+  session: unknown
 }
 
 export const LoginSchema = z.object({
@@ -65,7 +65,7 @@ export function useAuth() {
       try {
         const res = await fetchWithAuth('/api/auth/me')
         return res.user as User
-      } catch (err) {
+      } catch (_err) {
         // If 401, clear token
         localStorage.removeItem(AUTH_KEY)
         return null

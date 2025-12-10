@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
-import { useState } from 'react'
+import { useState, useId } from 'react'
 import { useAuth } from '../hooks/use-auth'
 import { Button } from '../components/ui/button'
 import { Input } from '../components/ui/input'
@@ -12,6 +12,7 @@ export const Route = createFileRoute('/register')({
 function RegisterComponent() {
   const navigate = useNavigate()
   const { register } = useAuth()
+  const id = useId()
   
   const [username, setUsername] = useState('')
   const [email, setEmail] = useState('')
@@ -26,8 +27,9 @@ function RegisterComponent() {
       await register.mutateAsync({ username, email, password })
       // Redirect to home or dashboard
       navigate({ to: '/' })
-    } catch (err: any) {
-      setError(err.message || 'Failed to register')
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to register'
+      setError(message)
     }
   }
 
@@ -44,9 +46,9 @@ function RegisterComponent() {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="username">Username</Label>
+            <Label htmlFor={`${id}-username`}>Username</Label>
             <Input
-              id="username"
+              id={`${id}-username`}
               type="text"
               placeholder="johndoe"
               value={username}
@@ -57,9 +59,9 @@ function RegisterComponent() {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
+            <Label htmlFor={`${id}-email`}>Email</Label>
             <Input
-              id="email"
+              id={`${id}-email`}
               type="email"
               placeholder="you@example.com"
               value={email}
@@ -69,9 +71,9 @@ function RegisterComponent() {
           </div>
           
           <div className="space-y-2">
-            <Label htmlFor="password">Password</Label>
+            <Label htmlFor={`${id}-password`}>Password</Label>
             <Input
-              id="password"
+              id={`${id}-password`}
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}

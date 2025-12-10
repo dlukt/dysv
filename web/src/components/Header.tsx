@@ -14,28 +14,29 @@ const navLabels: Record<Locale, { home: string; pricing: string; cart: string; l
   hr: { home: 'Početna', pricing: 'Cjenik', cart: 'Košarica', login: 'Prijava', logout: 'Odjava', account: 'Račun' },
 }
 
-export default function Header() {
-  const [isMenuOpen, setIsMenuOpen] = useState(false)
-  const cart = useStore(cartStore)
-  const itemCount = getItemCount(cart)
-  const { pathname } = useRouterState({ select: (state) => state.location })
-  const locale = getLocaleFromPath(pathname)
-  const labels = navLabels[locale] ?? navLabels.de
-  const { user, logout } = useAuth()
-  
-  // Logic: Default locale (de) uses root paths, others get prefixed.
-  const base = locale === 'de' ? '' : `/${locale}`
-  const homePath = base || '/'
-  const pricingPath = `${base}/pricing`
-  const cartPath = `${base}/cart`
-  const loginPath = `/login` // Login is global? Or should be localized? For now, global.
+interface NavItemsProps {
+  mobile?: boolean
+  labels: { home: string; pricing: string; cart: string; login: string; logout: string; account: string }
+  homePath: string
+  pricingPath: string
+  cartPath: string
+  loginPath: string
+  user: { username: string } | null
+  logout: () => void
+  itemCount: number
+}
 
-  // Close menu when path changes
-  useEffect(() => {
-    setIsMenuOpen(false)
-  }, [pathname])
-
-  const NavItems = ({ mobile = false }: { mobile?: boolean }) => (
+const NavItems = ({ 
+  mobile = false, 
+  labels, 
+  homePath, 
+  pricingPath, 
+  cartPath, 
+  loginPath, 
+  user,
+  logout,
+  itemCount 
+}: NavItemsProps) => (
     <>
       <Link
         to={homePath}
@@ -54,8 +55,7 @@ export default function Header() {
       
       {/* Auth Links */}
       {user ? (
-        <>
-            <div className={`flex items-center gap-4 ${mobile ? 'flex-col items-start w-full' : ''}`}>
+        <div className={`flex items-center gap-4 ${mobile ? 'flex-col items-start w-full' : ''}`}>
                  <Link 
                     to="/account/addresses"
                     className={`text-sm text-cyan-400 font-medium hover:text-cyan-300 transition-colors ${mobile ? 'py-1' : ''}`}
@@ -63,13 +63,13 @@ export default function Header() {
                     {user.username}
                  </Link>
                  <button
+                    type="button"
                     onClick={() => logout()}
                     className={`text-slate-300 hover:text-white transition-colors ${mobile ? 'block py-2 text-lg w-full text-left' : ''}`}
                  >
                     {labels.logout}
                  </button>
             </div>
-        </>
       ) : (
         <Link
             to={loginPath}
@@ -112,6 +112,27 @@ export default function Header() {
     </>
   )
 
+export default function Header() {
+  const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const cart = useStore(cartStore)
+  const itemCount = getItemCount(cart)
+  const { pathname } = useRouterState({ select: (state) => state.location })
+  const locale = getLocaleFromPath(pathname)
+  const labels = navLabels[locale] ?? navLabels.de
+  const { user, logout } = useAuth()
+  
+  const base = locale === 'de' ? '' : `/${locale}`
+  const homePath = base || '/'
+  const pricingPath = `${base}/pricing`
+  const cartPath = `${base}/cart`
+  const loginPath = `/login`
+
+  // Close menu when path changes
+  // biome-ignore lint/correctness/useExhaustiveDependencies: Close menu on path change
+  useEffect(() => {
+    setIsMenuOpen(false)
+  }, [pathname])
+
   return (
     <header className="sticky top-0 z-40 bg-slate-900/80 backdrop-blur border-b border-slate-800">
       <div className="max-w-7xl mx-auto px-6 py-4">
@@ -123,11 +144,21 @@ export default function Header() {
 
           {/* Desktop Nav */}
           <nav className="hidden md:flex items-center gap-6 text-slate-300">
-            <NavItems />
+            <NavItems 
+                labels={labels} 
+                homePath={homePath} 
+                pricingPath={pricingPath} 
+                cartPath={cartPath} 
+                loginPath={loginPath} 
+                user={user || null} 
+                logout={logout} 
+                itemCount={itemCount} 
+            />
           </nav>
 
           {/* Mobile Menu Toggle */}
           <button 
+            type="button"
             className="md:hidden text-slate-300 hover:text-white"
             onClick={() => setIsMenuOpen(!isMenuOpen)}
             aria-label="Toggle menu"
@@ -139,7 +170,17 @@ export default function Header() {
         {/* Mobile Nav */}
         {isMenuOpen && (
           <nav className="md:hidden flex flex-col gap-2 mt-4 pb-4 animate-in fade-in slide-in-from-top-4 duration-200">
-            <NavItems mobile />
+            <NavItems 
+                mobile 
+                labels={labels} 
+                homePath={homePath} 
+                pricingPath={pricingPath} 
+                cartPath={cartPath} 
+                loginPath={loginPath} 
+                user={user || null} 
+                logout={logout} 
+                itemCount={itemCount} 
+            />
           </nav>
         )}
       </div>

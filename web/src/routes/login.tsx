@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
-import { useState } from 'react'
+import { useState, useId } from 'react'
 import { z } from 'zod'
 import { useAuth } from '../hooks/use-auth'
 import { Button } from '../components/ui/button'
@@ -19,6 +19,7 @@ function LoginComponent() {
   const navigate = useNavigate()
   const search = Route.useSearch()
   const { login } = useAuth()
+  const id = useId()
   
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -32,8 +33,9 @@ function LoginComponent() {
       await login.mutateAsync({ email, password })
       // Redirect
       navigate({ to: search.redirect || '/' })
-    } catch (err: any) {
-      setError(err.message || 'Failed to login')
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to login'
+      setError(message)
     }
   }
 
@@ -50,9 +52,9 @@ function LoginComponent() {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
+            <Label htmlFor={`${id}-email`}>Email</Label>
             <Input
-              id="email"
+              id={`${id}-email`}
               type="email"
               placeholder="you@example.com"
               value={email}
@@ -62,9 +64,9 @@ function LoginComponent() {
           </div>
           
           <div className="space-y-2">
-            <Label htmlFor="password">Password</Label>
+            <Label htmlFor={`${id}-password`}>Password</Label>
             <Input
-              id="password"
+              id={`${id}-password`}
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}

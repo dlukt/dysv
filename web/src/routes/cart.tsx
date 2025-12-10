@@ -30,7 +30,7 @@ export function CartPage() {
 
   // Derived state for display
   const cartItems = cart.items.map((item) => {
-    let details
+    let details: { name: string; monthlyPrice: number; limits?: unknown } | undefined
     if (item.type === 'plan') {
       details = plans.find((p) => p.id === item.id)
     } else {
@@ -39,7 +39,7 @@ export function CartPage() {
     return {
       ...item,
       name: details?.name || item.id,
-      description: item.type === 'plan' ? (details as any)?.limits : t.cart.domain_reg,
+      description: item.type === 'plan' ? (details as { limits: string } | undefined)?.limits : t.cart.domain_reg,
       unitPrice: details?.monthlyPrice || 0,
     }
   })
@@ -241,6 +241,7 @@ export function CartPage() {
                   {/* Quantity Controls */}
                   <div className="flex items-center gap-2 bg-slate-700/50 rounded-lg p-1">
                     <button
+                      type="button"
                       onClick={() => updateQuantity(item.id, item.quantity - 1)}
                       className="w-8 h-8 flex items-center justify-center text-slate-400 hover:text-white transition-colors"
                       disabled={item.quantity <= 1}
@@ -251,6 +252,7 @@ export function CartPage() {
                       {item.quantity}
                     </span>
                     <button
+                      type="button"
                       onClick={() => updateQuantity(item.id, item.quantity + 1)}
                       className="w-8 h-8 flex items-center justify-center text-slate-400 hover:text-white transition-colors"
                     >

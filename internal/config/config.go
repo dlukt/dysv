@@ -32,6 +32,12 @@ type Config struct {
 
 // Load reads configuration from environment variables
 func Load() (*Config, error) {
+	viper.SetConfigFile(".env")
+	if err := viper.ReadInConfig(); err != nil {
+		if _, ok := err.(viper.ConfigFileNotFoundError); !ok {
+			log.Printf("Config: Error reading .env file: %v", err)
+		}
+	}
 	viper.AutomaticEnv()
 
 	// Set defaults

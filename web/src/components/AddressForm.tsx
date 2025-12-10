@@ -1,9 +1,8 @@
-import { useState } from 'react'
+import { useState, useId } from 'react'
 import { z } from 'zod'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Checkbox } from '@/components/ui/checkbox'
 
 // ISO 3166-1 alpha-2 codes (subset for brevity, can enable full list later)
 const countries = [
@@ -50,23 +49,21 @@ export function AddressForm({ initialData, onSubmit, onCancel, isSubmitting }: A
     country: initialData?.country || 'DE',
     isDefault: initialData?.isDefault || false,
   })
-
-  // Basic error handling state could be added here if we want per-field errors from Zod parse
   
+  const id = useId()
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    // Could validate with Zod here before submitting
     try {
         AddressSchema.parse(formData)
         await onSubmit(formData)
     } catch (err) {
-        // Handle validation error
         console.error(err)
         alert('Please check your input')
     }
   }
 
-  const handleChange = (field: keyof AddressFormData, value: any) => {
+  const handleChange = (field: keyof AddressFormData, value: string | boolean) => {
     setFormData(prev => ({ ...prev, [field]: value }))
   }
 
@@ -74,13 +71,13 @@ export function AddressForm({ initialData, onSubmit, onCancel, isSubmitting }: A
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="space-y-2">
-            <Label htmlFor="label">Label (e.g. Home)</Label>
-            <Input id="label" value={formData.label} onChange={e => handleChange('label', e.target.value)} required />
+            <Label htmlFor={`${id}-label`}>Label (e.g. Home)</Label>
+            <Input id={`${id}-label`} value={formData.label} onChange={e => handleChange('label', e.target.value)} required />
         </div>
         <div className="space-y-2">
-             <Label htmlFor="country">Country</Label>
+             <Label htmlFor={`${id}-country`}>Country</Label>
              <select 
-                id="country" 
+                id={`${id}-country`} 
                 className="flex h-10 w-full rounded-md border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-cyan-500"
                 value={formData.country}
                 onChange={e => handleChange('country', e.target.value)}
@@ -93,41 +90,39 @@ export function AddressForm({ initialData, onSubmit, onCancel, isSubmitting }: A
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="line1">Address Line 1</Label>
-        <Input id="line1" value={formData.line1} onChange={e => handleChange('line1', e.target.value)} required />
+        <Label htmlFor={`${id}-line1`}>Address Line 1</Label>
+        <Input id={`${id}-line1`} value={formData.line1} onChange={e => handleChange('line1', e.target.value)} required />
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="line2">Address Line 2 (Optional)</Label>
-        <Input id="line2" value={formData.line2} onChange={e => handleChange('line2', e.target.value)} />
+        <Label htmlFor={`${id}-line2`}>Address Line 2 (Optional)</Label>
+        <Input id={`${id}-line2`} value={formData.line2} onChange={e => handleChange('line2', e.target.value)} />
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
         <div className="space-y-2">
-             <Label htmlFor="postalCode">Postal Code</Label>
-             <Input id="postalCode" value={formData.postalCode} onChange={e => handleChange('postalCode', e.target.value)} required />
+             <Label htmlFor={`${id}-postalCode`}>Postal Code</Label>
+             <Input id={`${id}-postalCode`} value={formData.postalCode} onChange={e => handleChange('postalCode', e.target.value)} required />
         </div>
          <div className="space-y-2">
-             <Label htmlFor="city">City</Label>
-             <Input id="city" value={formData.city} onChange={e => handleChange('city', e.target.value)} required />
+             <Label htmlFor={`${id}-city`}>City</Label>
+             <Input id={`${id}-city`} value={formData.city} onChange={e => handleChange('city', e.target.value)} required />
         </div>
          <div className="space-y-2 col-span-2 md:col-span-1">
-             <Label htmlFor="state">State/Province</Label>
-             <Input id="state" value={formData.state || ''} onChange={e => handleChange('state', e.target.value)} />
+             <Label htmlFor={`${id}-state`}>State/Province</Label>
+             <Input id={`${id}-state`} value={formData.state || ''} onChange={e => handleChange('state', e.target.value)} />
         </div>
       </div>
       
        <div className="flex items-center space-x-2 pt-2">
-          {/* Checkbox component might need 'checked' and 'onCheckedChange' props if it's Radix UI based, 
-              or standard input if native. Assuming shadcn-like: checked={val} onCheckedChange={setVal} */}
           <input 
             type="checkbox" 
-            id="isDefault" 
+            id={`${id}-isDefault`} 
             checked={formData.isDefault} 
             onChange={e => handleChange('isDefault', e.target.checked)}
             className="h-4 w-4 rounded border-slate-700 bg-slate-900 text-cyan-500 focus:ring-cyan-500"
           />
-          <Label htmlFor="isDefault">Set as default address</Label>
+          <Label htmlFor={`${id}-isDefault`}>Set as default address</Label>
       </div>
 
       <div className="flex justify-end gap-3 pt-4">
