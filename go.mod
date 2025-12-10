@@ -3,7 +3,9 @@ module github.com/deicod/dysv
 go 1.25.5
 
 require (
+	github.com/MadAppGang/httplog v1.3.0
 	github.com/davecgh/go-spew v1.1.1
+	github.com/deicod/auth v0.0.0-20251210200755-1c8c4b1168c9
 	github.com/onsi/ginkgo/v2 v2.27.3
 	github.com/onsi/gomega v1.38.3
 	github.com/spf13/cobra v1.10.2
@@ -13,11 +15,9 @@ require (
 )
 
 require (
-	github.com/MadAppGang/httplog v1.3.0 // indirect
 	github.com/Masterminds/semver/v3 v3.4.0 // indirect
 	github.com/TylerBrock/colorjson v0.0.0-20200706003622-8a50f05110d2 // indirect
-	github.com/deicod/auth v0.0.0-20251209073958-13a0beb4cbf9 // indirect
-	github.com/fatih/color v1.13.0 // indirect
+	github.com/fatih/color v1.18.0 // indirect
 	github.com/fsnotify/fsnotify v1.9.0 // indirect
 	github.com/go-logr/logr v1.4.3 // indirect
 	github.com/go-task/slim-sprig/v3 v3.0.0 // indirect
@@ -32,8 +32,8 @@ require (
 	github.com/jackc/pgx/v5 v5.7.6 // indirect
 	github.com/jackc/puddle/v2 v2.2.2 // indirect
 	github.com/klauspost/compress v1.18.2 // indirect
-	github.com/mattn/go-colorable v0.1.13 // indirect
-	github.com/mattn/go-isatty v0.0.17 // indirect
+	github.com/mattn/go-colorable v0.1.14 // indirect
+	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/montanaflynn/stats v0.7.1 // indirect
 	github.com/pelletier/go-toml/v2 v2.2.4 // indirect
 	github.com/sagikazarmark/locafero v0.12.0 // indirect
