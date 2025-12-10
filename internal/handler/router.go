@@ -10,6 +10,8 @@ import (
 	"time"
 
 	"github.com/MadAppGang/httplog"
+	"github.com/deicod/auth"
+	"github.com/deicod/auth/mgo"
 	"github.com/deicod/dysv/internal/config"
 	"github.com/deicod/dysv/internal/repo"
 	"github.com/deicod/dysv/internal/service"
@@ -38,6 +40,7 @@ func NewRouter(cfg *config.Config) http.Handler {
 
 	var cartHandler *CartHandler
 	var checkoutHandler *CheckoutHandler
+	var authHandler *AuthHandler
 
 	if client != nil {
 		db := client.Database("dysv")
@@ -52,6 +55,37 @@ func NewRouter(cfg *config.Config) http.Handler {
 			cancelURL := cfg.BaseURL + "/cart"
 			checkoutService := service.NewCheckoutService(cartService, orderRepo, cfg.StripeSecret, successURL, cancelURL)
 			checkoutHandler = NewCheckoutHandler(checkoutService, cfg.StripeWebhookSecret, cfg.StripeAPIVersion)
+		}
+
+		// Initialize Auth Service
+		ac := auth.DefaultConfig()
+		ac.Backend = auth.BackendMongo
+		ac.Mongo = &mgo.Config{
+			URI:              cfg.MongoURI,
+			Database:         "dysv",
+			OperationTimeout: cfg.MongoTimeout,
+		}
+
+		// Configure email if provided
+		if cfg.AuthEmailHost != "" {
+			ac.Email.Host = cfg.AuthEmailHost
+			ac.Email.Port = cfg.AuthEmailPort
+			ac.Email.User = cfg.AuthEmailUser
+			ac.Email.Pass = cfg.AuthEmailPass
+			ac.Email.UseSSL = cfg.AuthEmailUseSSL
+		}
+		if cfg.AuthEmailFrom != "" {
+			ac.Email.From = cfg.AuthEmailFrom
+		}
+
+		// Use a separate context for auth service initialization if needed,
+		// but usually it uses the context for initial setup checks.
+		// Since Request Scope context is passed to methods, this is fine.
+		authSvc, err := auth.NewService(context.Background(), ac)
+		if err != nil {
+			log.Printf("Error: Failed to initialize Auth Service: %v", err)
+		} else {
+			authHandler = NewAuthHandler(authSvc)
 		}
 	}
 
@@ -74,6 +108,16 @@ func NewRouter(cfg *config.Config) http.Handler {
 		}
 		writeJSON(w, http.StatusOK, map[string]interface{}{"plans": plans})
 	})
+
+	// Auth endpoints
+	if authHandler != nil {
+		mux.HandleFunc("POST /api/auth/register", authHandler.Register)
+		mux.HandleFunc("POST /api/auth/login", authHandler.Login)
+		mux.HandleFunc("POST /api/auth/verify", authHandler.VerifyEmail)
+		mux.HandleFunc("POST /api/auth/forgot-password", authHandler.ForgotPassword)
+		mux.HandleFunc("POST /api/auth/reset-password", authHandler.ResetPassword)
+		mux.HandleFunc("GET /api/auth/me", authHandler.Me)
+	}
 
 	// Cart endpoints (require MongoDB)
 	if cartHandler != nil {
