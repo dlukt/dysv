@@ -74,7 +74,7 @@ var _ = Describe("Checkout Handler", func() {
 			req.Header.Set("Content-Type", "application/json")
 			rec := httptest.NewRecorder()
 
-			cartHandler.SetPlan(rec, req)
+			cartHandler.AddPlan(rec, req)
 
 			Expect(rec.Code).To(Equal(http.StatusOK))
 
@@ -98,28 +98,28 @@ var _ = Describe("Checkout Handler", func() {
 			req.Header.Set("Content-Type", "application/json")
 			rec := httptest.NewRecorder()
 
-			cartHandler.SetPlan(rec, req)
+			cartHandler.AddPlan(rec, req)
 
 			Expect(rec.Code).To(Equal(http.StatusBadRequest))
 		})
 
-		It("should replace existing plan", func() {
+		It("should allow multiple plans", func() {
 			// Add first plan
 			body := `{"planId": "static-micro"}`
 			req := httptest.NewRequest(http.MethodPost, "/api/cart/plan", stringReader(body))
 			req.Header.Set("X-Session-ID", "test-session")
 			req.Header.Set("Content-Type", "application/json")
 			rec := httptest.NewRecorder()
-			cartHandler.SetPlan(rec, req)
+			cartHandler.AddPlan(rec, req)
 			Expect(rec.Code).To(Equal(http.StatusOK))
 
-			// Replace with second plan
+			// Add second plan (append)
 			body = `{"planId": "node-pro"}`
 			req = httptest.NewRequest(http.MethodPost, "/api/cart/plan", stringReader(body))
 			req.Header.Set("X-Session-ID", "test-session")
 			req.Header.Set("Content-Type", "application/json")
 			rec = httptest.NewRecorder()
-			cartHandler.SetPlan(rec, req)
+			cartHandler.AddPlan(rec, req)
 			Expect(rec.Code).To(Equal(http.StatusOK))
 
 			var resp map[string]interface{}
@@ -128,10 +128,13 @@ var _ = Describe("Checkout Handler", func() {
 
 			cart := resp["cart"].(map[string]interface{})
 			items := cart["items"].([]interface{})
-			Expect(items).To(HaveLen(1))
+			Expect(items).To(HaveLen(2))
 
 			item := items[0].(map[string]interface{})
-			Expect(item["itemId"]).To(Equal("node-pro"))
+			Expect(item["itemId"]).To(Equal("static-micro"))
+
+			item2 := items[1].(map[string]interface{})
+			Expect(item2["itemId"]).To(Equal("node-pro"))
 		})
 	})
 
@@ -197,7 +200,7 @@ var _ = Describe("Checkout Handler", func() {
 			req.Header.Set("X-Session-ID", "test-session")
 			req.Header.Set("Content-Type", "application/json")
 			rec := httptest.NewRecorder()
-			cartHandler.SetPlan(rec, req)
+			cartHandler.AddPlan(rec, req)
 
 			// Add addon (€1.00/mo)
 			body = `{"addonId": "de-domain"}`

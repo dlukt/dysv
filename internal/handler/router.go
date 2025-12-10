@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/MadAppGang/httplog"
 	"github.com/deicod/dysv/internal/config"
 	"github.com/deicod/dysv/internal/repo"
 	"github.com/deicod/dysv/internal/service"
@@ -77,9 +78,10 @@ func NewRouter(cfg *config.Config) http.Handler {
 	// Cart endpoints (require MongoDB)
 	if cartHandler != nil {
 		mux.HandleFunc("GET /api/cart", cartHandler.GetCart)
-		mux.HandleFunc("POST /api/cart/plan", cartHandler.SetPlan)
+		mux.HandleFunc("POST /api/cart/plan", cartHandler.AddPlan)
 		mux.HandleFunc("POST /api/cart/addon", cartHandler.AddAddon)
 		mux.HandleFunc("DELETE /api/cart/item/{itemId}", cartHandler.RemoveItem)
+		mux.HandleFunc("PUT /api/cart/item/{itemId}", cartHandler.UpdateItemQuantity)
 		mux.HandleFunc("POST /api/cart/billing-cycle", cartHandler.SetBillingCycle)
 	} else {
 		// Return error if MongoDB not available
@@ -106,7 +108,11 @@ func NewRouter(cfg *config.Config) http.Handler {
 	}
 
 	// CORS middleware
-	return corsMiddleware(mux)
+	handler := corsMiddleware(mux)
+
+	// Logging middleware with headers
+	httplog.ForceConsoleColor()
+	return httplog.HandlerWithFormatter(httplog.DefaultLogFormatterWithRequestHeader, handler)
 }
 
 // corsMiddleware adds CORS headers for frontend development

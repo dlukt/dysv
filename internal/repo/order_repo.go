@@ -6,6 +6,7 @@ package repo
 import (
 	"context"
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/deicod/dysv/internal/model"
@@ -37,6 +38,7 @@ func (r *OrderRepo) Create(ctx context.Context, order *model.Order) error {
 
 	result, err := r.coll.InsertOne(ctx, order)
 	if err != nil {
+		fmt.Printf("OrderRepo: InsertOne Error: %v\n", err)
 		return err
 	}
 	order.ID = result.InsertedID.(bson.ObjectID)
@@ -54,6 +56,7 @@ func (r *OrderRepo) FindByStripeSessionID(ctx context.Context, stripeSessionID s
 		if errors.Is(err, mongo.ErrNoDocuments) {
 			return nil, ErrNotFound
 		}
+		fmt.Printf("OrderRepo: FindOne Error: %v\n", err)
 		return nil, err
 	}
 	return &order, nil

@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react'
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { useStore } from '@tanstack/react-store'
 import { ArrowLeft, Trash2, CreditCard } from 'lucide-react'
@@ -7,9 +8,9 @@ import { Button } from '@/components/ui/button'
 import { plans, addons } from '@/data/pricing-data'
 import {
   cartStore,
-  clearPlan,
-  removeAddon,
   hasItems,
+  updateQuantity,
+  removeFromCart,
 } from '@/lib/cart-store'
 
 export const Route = createFileRoute('/cart')({
@@ -24,22 +25,36 @@ export function CartPage() {
   const { t, locale } = useTranslation()
   const pricingPath = locale === 'de' ? '/pricing' : `/${locale}/pricing`
 
-  const selectedPlan = plans.find((p) => p.id === cart.planId)
-  const selectedAddons = addons.filter((a) => cart.addons.includes(a.id))
+  // Derived state for display
+  const cartItems = cart.items.map((item) => {
+    let details
+    if (item.type === 'plan') {
+      details = plans.find((p) => p.id === item.id)
+    } else {
+      details = addons.find((a) => a.id === item.id)
+    }
+    return {
+      ...item,
+      name: details?.name || item.id,
+      description: item.type === 'plan' ? (details as any)?.limits : t.cart.domain_reg,
+      unitPrice: details?.monthlyPrice || 0,
+    }
+  })
 
-  // Calculate totals - always use raw monthly prices for display
-  const planMonthlyPrice = selectedPlan?.monthlyPrice ?? 0
-  const addonsMonthlyPrice = selectedAddons.reduce((sum, addon) => sum + addon.monthlyPrice, 0)
+  // Calculate totals
+  const monthlyTotal = cartItems.reduce(
+    (sum, item) => sum + item.unitPrice * item.quantity,
+    0
+  )
 
-  // Monthly display: raw monthly price
-  const monthlyTotal = planMonthlyPrice + addonsMonthlyPrice
+  // Yearly: Plans get 2 months free (pay 10), Addons pay 12
+  const yearlyTotal = cartItems.reduce((sum, item) => {
+    if (item.type === 'plan') {
+      return sum + item.unitPrice * 10 * item.quantity
+    }
+    return sum + item.unitPrice * 12 * item.quantity
+  }, 0)
 
-  // Yearly display: plan gets 2 months free (10 months), addons pay full 12 months
-  const planYearlyPrice = planMonthlyPrice * 10 // 2 months free
-  const addonsYearlyPrice = addonsMonthlyPrice * 12 // No discount
-  const yearlyTotal = planYearlyPrice + addonsYearlyPrice
-
-  // Helper to get or create session ID
   const getSessionId = () => {
     let sessionId = localStorage.getItem('dysv_session_id')
     if (!sessionId) {
@@ -49,9 +64,8 @@ export function CartPage() {
     return sessionId
   }
 
-  // Sync cart to backend (handles additions AND removals)
+  // Sync cart: Local is Truth. Make backend match local.
   const syncCartToBackend = async (sessionId: string) => {
-    // ... existing sync logic ...
     const headers = {
       'Content-Type': 'application/json',
       'X-Session-ID': sessionId,
@@ -59,85 +73,85 @@ export function CartPage() {
 
     const ensureOk = async (response: Response, context: string) => {
       if (response.ok) return
-
       let detail = ''
       try {
         const body = await response.json()
-        if (body && typeof body.error === 'string') {
-          detail = body.error
-        }
-      } catch {
-        // Ignore JSON parse errors; fall back to status text
-      }
-
+        detail = body.error
+      } catch {} // eslint-disable-line no-empty
       const message = detail || response.statusText || 'unexpected error'
       throw new Error(`${context}: ${message}`)
     }
 
-    // First, get current backend cart to find items to remove
+    // 1. Get backend state
     const cartResponse = await fetch('/api/cart', { headers })
     await ensureOk(cartResponse, 'Failed to load cart')
-
-    let backendAddons: string[] = []
-    let backendPlans: string[] = []
     const data = await cartResponse.json()
-    const backendItems = data.cart?.items ?? []
-    backendAddons = backendItems
-      .filter((item: { itemType: string }) => item.itemType === 'addon')
-      .map((item: { itemId: string }) => item.itemId)
-    backendPlans = backendItems
-      .filter((item: { itemType: string }) => item.itemType === 'plan')
-      .map((item: { itemId: string }) => item.itemId)
+    const backendItems: { itemId: string; quantity: number }[] =
+      data.cart?.items ?? []
 
-    // Remove addons that are on backend but not in local cart
-    for (const addonId of backendAddons) {
-      if (!cart.addons.includes(addonId)) {
-        const resp = await fetch(`/api/cart/item/${addonId}`, {
-          method: 'DELETE',
-          headers,
-        })
-        await ensureOk(resp, 'Failed to remove addon from cart')
-      }
-    }
-
-    // Remove backend plan if it was cleared locally
-    if (!cart.planId) {
-      for (const planId of backendPlans) {
-        const resp = await fetch(`/api/cart/item/${planId}`, {
-          method: 'DELETE',
-          headers,
-        })
-        await ensureOk(resp, 'Failed to remove plan from cart')
-      }
-    }
-
-    // Set billing cycle
-    const billingResp = await fetch('/api/cart/billing-cycle', {
-      method: 'POST',
-      headers,
-      body: JSON.stringify({ billingCycle: cart.billingCycle }),
-    })
-    await ensureOk(billingResp, 'Failed to set billing cycle')
-
-    // Set plan if selected (this replaces any existing plan)
-    if (cart.planId) {
-      const planResp = await fetch('/api/cart/plan', {
+    // 2. Set Billing Cycle
+    await ensureOk(
+      await fetch('/api/cart/billing-cycle', {
         method: 'POST',
         headers,
-        body: JSON.stringify({ planId: cart.planId }),
-      })
-      await ensureOk(planResp, 'Failed to set plan')
+        body: JSON.stringify({ billingCycle: cart.billingCycle }),
+      }),
+      'Failed to set billing cycle'
+    )
+
+    // 3. Sync Items
+    // Track what we've handled on backend to know what to delete
+    const handledBackendItemIds = new Set<string>()
+
+    for (const localItem of cart.items) {
+      const backendItem = backendItems.find((bi) => bi.itemId === localItem.id)
+
+      if (backendItem) {
+        handledBackendItemIds.add(backendItem.itemId)
+        // If quantity mismatch, update
+        if (backendItem.quantity !== localItem.quantity) {
+          await ensureOk(
+            await fetch(`/api/cart/item/${localItem.id}`, {
+              method: 'PUT',
+              headers,
+              body: JSON.stringify({ quantity: localItem.quantity }),
+            }),
+            `Failed to update quantity for ${localItem.id}`
+          )
+        }
+      } else {
+        // Not in backend, add it
+        const endpoint =
+          localItem.type === 'plan' ? '/api/cart/plan' : '/api/cart/addon'
+        const bodyKey = localItem.type === 'plan' ? 'planId' : 'addonId'
+        // For 'add', simplistic API might add to existing?
+        // Our 'AddPlan' adds quantity. If we just call it with full quantity, it adds that much more?
+        // No, AddPlan increments. But here we know it's 0 on backend.
+        // So calling AddPlan(qty) is correct.
+        await ensureOk(
+          await fetch(endpoint, {
+            method: 'POST',
+            headers,
+            body: JSON.stringify({
+              [bodyKey]: localItem.id,
+              quantity: localItem.quantity,
+            }),
+          }),
+          `Failed to add ${localItem.id}`
+        )
+      }
     }
 
-    // Add addons that are in local cart but not on backend
-    for (const addonId of cart.addons) {
-      if (!backendAddons.includes(addonId)) {
-        const resp = await fetch('/api/cart/addon', {
-          method: 'POST',
-          headers,
-          body: JSON.stringify({ addonId }),
-        })
-        await ensureOk(resp, 'Failed to add addon')
+    // 4. Remove backend items not in local
+    for (const backendItem of backendItems) {
+      if (!handledBackendItemIds.has(backendItem.itemId)) {
+        await ensureOk(
+          await fetch(`/api/cart/item/${backendItem.itemId}`, {
+            method: 'DELETE',
+            headers,
+          }),
+          `Failed to remove ${backendItem.itemId}`
+        )
       }
     }
   }
@@ -145,8 +159,6 @@ export function CartPage() {
   const handleCheckout = async () => {
     try {
       const sessionId = getSessionId()
-
-      // Sync local cart to backend before checkout
       await syncCartToBackend(sessionId)
 
       const response = await fetch('/api/checkout', {
@@ -168,17 +180,25 @@ export function CartPage() {
         window.location.href = data.url
       }
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'Checkout failed. Please try again.'
+      const message =
+        err instanceof Error ? err.message : 'Checkout failed. Please try again.'
       console.error('Checkout error:', err)
       alert(message)
     }
   }
 
-  if (isEmpty) {
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  if (!mounted || isEmpty) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center">
         <div className="text-center px-6">
-          <h1 className="text-3xl font-bold text-white mb-4">{t.cart.empty.title}</h1>
+          <h1 className="text-3xl font-bold text-white mb-4">
+            {t.cart.empty.title}
+          </h1>
           <p className="text-slate-400 mb-8">{t.cart.empty.description}</p>
           <Link to={pricingPath}>
             <Button className="bg-cyan-500 hover:bg-cyan-600 text-white">
@@ -192,10 +212,12 @@ export function CartPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900">
-      {/* Cart Content */}
       <main className="px-6 max-w-4xl mx-auto">
         <div className="py-6">
-          <Link to={pricingPath} className="inline-flex items-center gap-2 text-slate-400 hover:text-white transition-colors">
+          <Link
+            to={pricingPath}
+            className="inline-flex items-center gap-2 text-slate-400 hover:text-white transition-colors"
+          >
             <ArrowLeft className="w-4 h-4" />
             {t.cart.back}
           </Link>
@@ -203,52 +225,54 @@ export function CartPage() {
         <h1 className="text-3xl font-bold text-white mb-8">{t.cart.title}</h1>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Cart Items */}
+          {/* Cart Items List */}
           <div className="lg:col-span-2 space-y-4">
-            {/* Plan */}
-            {selectedPlan && (
-              <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700 rounded-xl p-6 flex items-center justify-between">
-                <div>
-                  <h3 className="text-lg font-semibold text-white">{selectedPlan.name}</h3>
-                  <p className="text-sm text-slate-400">{selectedPlan.limits}</p>
-                  <p className="text-sm text-cyan-400 mt-1">
-                    {isYearly ? t.cart.billed_yearly : t.cart.billed_monthly}
-                  </p>
-                </div>
-                <div className="flex items-center gap-4">
-                  <span className="text-xl font-bold text-white">
-                    €{planMonthlyPrice.toFixed(2)}/mo
-                  </span>
-                  <Button
-                    variant="ghost"
-                    size="icon-sm"
-                    onClick={clearPlan}
-                    className="text-slate-400 hover:text-red-400"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </Button>
-                </div>
-              </div>
-            )}
-
-            {/* Addons */}
-            {selectedAddons.map((addon) => (
+            {cartItems.map((item) => (
               <div
-                key={addon.id}
-                className="bg-slate-800/50 backdrop-blur-sm border border-slate-700 rounded-xl p-6 flex items-center justify-between"
+                key={item.id}
+                className="bg-slate-800/50 backdrop-blur-sm border border-slate-700 rounded-xl p-6 flex flex-col sm:flex-row items-center justify-between gap-4"
               >
-                <div>
-                  <h3 className="text-lg font-semibold text-white">{addon.name}</h3>
-                  <p className="text-sm text-slate-400">{t.cart.domain_reg}</p>
+                <div className="flex-grow text-center sm:text-left">
+                  <h3 className="text-lg font-semibold text-white">
+                    {item.name}
+                  </h3>
+                  <p className="text-sm text-slate-400">{item.description}</p>
+                  {isYearly && item.type === 'plan' && (
+                    <p className="text-sm text-cyan-400 mt-1">
+                      {t.cart.billed_yearly}
+                    </p>
+                  )}
                 </div>
+
                 <div className="flex items-center gap-4">
-                  <span className="text-xl font-bold text-white">
-                    €{addon.monthlyPrice.toFixed(2)}/mo
+                  {/* Quantity Controls */}
+                  <div className="flex items-center gap-2 bg-slate-700/50 rounded-lg p-1">
+                    <button
+                      onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                      className="w-8 h-8 flex items-center justify-center text-slate-400 hover:text-white transition-colors"
+                      disabled={item.quantity <= 1}
+                    >
+                      -
+                    </button>
+                    <span className="w-8 text-center text-white font-medium">
+                      {item.quantity}
+                    </span>
+                    <button
+                      onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                      className="w-8 h-8 flex items-center justify-center text-slate-400 hover:text-white transition-colors"
+                    >
+                      +
+                    </button>
+                  </div>
+
+                  <span className="text-xl font-bold text-white min-w-[100px] text-right">
+                    €{(item.unitPrice * item.quantity).toFixed(2)}/mo
                   </span>
+
                   <Button
                     variant="ghost"
                     size="icon-sm"
-                    onClick={() => removeAddon(addon.id)}
+                    onClick={() => removeFromCart(item.id)}
                     className="text-slate-400 hover:text-red-400"
                   >
                     <Trash2 className="w-4 h-4" />
@@ -261,17 +285,23 @@ export function CartPage() {
           {/* Order Summary */}
           <div className="lg:col-span-1">
             <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700 rounded-xl p-6 sticky top-6">
-              <h2 className="text-lg font-semibold text-white mb-4">{t.cart.summary.title}</h2>
+              <h2 className="text-lg font-semibold text-white mb-4">
+                {t.cart.summary.title}
+              </h2>
 
               <div className="space-y-3 mb-6">
                 <div className="flex justify-between text-slate-400">
                   <span>{t.cart.summary.subtotal}</span>
                   <span>€{monthlyTotal.toFixed(2)}/mo</span>
                 </div>
-                {isYearly && planMonthlyPrice > 0 && (
+                {isYearly && (
                   <div className="flex justify-between text-cyan-400 text-sm">
                     <span>{t.cart.summary.yearly_discount}</span>
-                    <span>-€{(planMonthlyPrice * 2).toFixed(2)}</span>
+                    <span>
+                      -€
+                      {(monthlyTotal * 12 - yearlyTotal).toFixed(2)}
+                      /yrSaved
+                    </span>
                   </div>
                 )}
                 <div className="border-t border-slate-700 pt-3 flex justify-between text-white font-semibold">
@@ -279,7 +309,9 @@ export function CartPage() {
                   <div className="text-right">
                     <p>€{monthlyTotal.toFixed(2)}/mo</p>
                     {isYearly && (
-                      <p className="text-sm text-slate-400">€{yearlyTotal.toFixed(2)}/year</p> // /year is hardcoded?
+                      <p className="text-sm text-slate-400">
+                        €{yearlyTotal.toFixed(2)}/year
+                      </p>
                     )}
                   </div>
                 </div>

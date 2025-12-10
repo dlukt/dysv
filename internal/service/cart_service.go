@@ -6,8 +6,10 @@ package service
 import (
 	"context"
 	"errors"
+	"fmt"
 	"time"
 
+	"github.com/davecgh/go-spew/spew"
 	"github.com/deicod/dysv/internal/model"
 	"github.com/deicod/dysv/internal/repo"
 )
@@ -66,6 +68,7 @@ func (s *CartService) GetOrCreateCart(ctx context.Context, sessionID string) (*m
 		return cart, nil
 	}
 	if !errors.Is(err, repo.ErrNotFound) {
+		fmt.Printf("Service: GetOrCreateCart Find Error: %v\n", err)
 		return nil, err
 	}
 
@@ -79,16 +82,20 @@ func (s *CartService) GetOrCreateCart(ctx context.Context, sessionID string) (*m
 	}
 
 	if err := s.cartRepo.Create(ctx, cart); err != nil {
+		fmt.Printf("Service: GetOrCreateCart Create Error: %v\n", err)
 		return nil, err
 	}
 	return cart, nil
 }
 
-// SetPlan sets the plan in the cart (replaces existing plan)
-func (s *CartService) SetPlan(ctx context.Context, sessionID, planID string) (*model.Cart, error) {
+// AddPlan adds a plan to the cart (increments quantity if exists)
+func (s *CartService) AddPlan(ctx context.Context, sessionID, planID string, quantity int) (*model.Cart, error) {
 	plan, ok := Plans[planID]
 	if !ok {
 		return nil, ErrInvalidPlan
+	}
+	if quantity < 1 {
+		quantity = 1
 	}
 
 	cart, err := s.GetOrCreateCart(ctx, sessionID)
@@ -96,24 +103,58 @@ func (s *CartService) SetPlan(ctx context.Context, sessionID, planID string) (*m
 		return nil, err
 	}
 
-	// Remove existing plan items
-	var newItems []model.LineItem
-	for _, item := range cart.Items {
-		if item.ItemType != "plan" {
-			newItems = append(newItems, item)
+	// Check if plan already exists
+	found := false
+	for i, item := range cart.Items {
+		if item.ItemType == "plan" && item.ItemID == planID {
+			cart.Items[i].Quantity += quantity
+			found = true
+			break
 		}
 	}
 
-	// Add new plan
-	newItems = append(newItems, model.LineItem{
-		ItemID:   plan.ID,
-		ItemType: "plan",
-		Name:     plan.Name,
-		Price:    plan.MonthlyPrice,
-		Quantity: 1,
-	})
+	if !found {
+		cart.Items = append(cart.Items, model.LineItem{
+			ItemID:   plan.ID,
+			ItemType: "plan",
+			Name:     plan.Name,
+			Price:    plan.MonthlyPrice,
+			Quantity: quantity,
+		})
+	}
 
-	cart.Items = newItems
+	cart.UpdatedAt = time.Now()
+
+	if err := s.cartRepo.Update(ctx, cart); err != nil {
+		return nil, err
+	}
+	return cart, nil
+}
+
+// UpdateItemQuantity updates the quantity of an item
+func (s *CartService) UpdateItemQuantity(ctx context.Context, sessionID, itemID string, quantity int) (*model.Cart, error) {
+	cart, err := s.GetOrCreateCart(ctx, sessionID)
+	if err != nil {
+		return nil, err
+	}
+
+	if quantity <= 0 {
+		return s.RemoveItem(ctx, sessionID, itemID)
+	}
+
+	found := false
+	for i, item := range cart.Items {
+		if item.ItemID == itemID {
+			cart.Items[i].Quantity = quantity
+			found = true
+			break
+		}
+	}
+
+	if !found {
+		return cart, nil // Item not found, do nothing or return error? Current logic: idempotent success
+	}
+
 	cart.UpdatedAt = time.Now()
 
 	if err := s.cartRepo.Update(ctx, cart); err != nil {
@@ -189,7 +230,11 @@ func (s *CartService) SetBillingCycle(ctx context.Context, sessionID string, cyc
 	cart.BillingCycle = cycle
 	cart.UpdatedAt = time.Now()
 
+	fmt.Printf("SetBillingCycle: session=%s cycle=%s\n", sessionID, cycle)
+	spew.Dump("Service Cart Before Update", cart)
+
 	if err := s.cartRepo.Update(ctx, cart); err != nil {
+		fmt.Printf("SetBillingCycle error: %v\n", err)
 		return nil, err
 	}
 	return cart, nil

@@ -38,9 +38,11 @@ func (h *CheckoutHandler) CreateCheckoutSession(w http.ResponseWriter, r *http.R
 	checkoutURL, err := h.checkoutService.CreateCheckoutSession(r.Context(), sessionID)
 	if err != nil {
 		if errors.Is(err, service.ErrEmptyCart) {
+			log.Printf("CheckoutHandler: CreateCheckoutSession EmptyCart: %v", err)
 			writeError(w, http.StatusBadRequest, err.Error())
 			return
 		}
+		log.Printf("CheckoutHandler: CreateCheckoutSession Error: %v", err)
 		writeError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -69,12 +71,23 @@ func (h *CheckoutHandler) Webhook(w http.ResponseWriter, r *http.Request) {
 
 	// Verify Stripe signature
 	sigHeader := r.Header.Get("Stripe-Signature")
+	log.Printf("Webhook: Payload size: %d bytes", len(payload))
+	log.Printf("Webhook: Stripe-Signature: %s", sigHeader)
+
+	maskSecret := "empty"
+	if len(h.webhookSecret) > 8 {
+		maskSecret = h.webhookSecret[:4] + "..." + h.webhookSecret[len(h.webhookSecret)-4:]
+	}
+	log.Printf("Webhook: Using Secret: %s", maskSecret)
+
 	if sigHeader == "" {
 		writeError(w, http.StatusBadRequest, "missing Stripe-Signature header")
 		return
 	}
 
-	event, err := webhook.ConstructEvent(payload, sigHeader, h.webhookSecret)
+	event, err := webhook.ConstructEventWithOptions(payload, sigHeader, h.webhookSecret, webhook.ConstructEventOptions{
+		IgnoreAPIVersionMismatch: true,
+	})
 	if err != nil {
 		log.Printf("Webhook: signature verification failed: %v", err)
 		writeError(w, http.StatusBadRequest, "signature verification failed")

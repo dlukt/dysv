@@ -4,6 +4,7 @@ Copyright © 2025 Darko Luketic <info@icod.de>
 package config
 
 import (
+	"log"
 	"time"
 
 	"github.com/spf13/viper"
@@ -32,6 +33,7 @@ func Load() (*Config, error) {
 
 	timeout, err := time.ParseDuration(viper.GetString("MONGODB_TIMEOUT"))
 	if err != nil {
+		log.Printf("Config: ParseDuration error: %v\n", err)
 		timeout = 30 * time.Second
 	}
 

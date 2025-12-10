@@ -37,6 +37,7 @@ func NewCheckoutService(cartService *CartService, orderRepo repo.OrderRepository
 func (s *CheckoutService) CreateCheckoutSession(ctx context.Context, sessionID string) (string, error) {
 	cart, err := s.cartService.GetOrCreateCart(ctx, sessionID)
 	if err != nil {
+		fmt.Printf("CheckoutService: GetOrCreateCart Error: %v\n", err)
 		return "", err
 	}
 
@@ -100,6 +101,7 @@ func (s *CheckoutService) CreateCheckoutSession(ctx context.Context, sessionID s
 
 	stripeSession, err := session.New(params)
 	if err != nil {
+		fmt.Printf("CheckoutService: Stripe Session New Error: %v\n", err)
 		return "", fmt.Errorf("failed to create checkout session: %w", err)
 	}
 
@@ -115,6 +117,7 @@ func (s *CheckoutService) CreateCheckoutSession(ctx context.Context, sessionID s
 	}
 
 	if err := s.orderRepo.Create(ctx, order); err != nil {
+		fmt.Printf("CheckoutService: OrderRepo Create Error: %v\n", err)
 		return "", fmt.Errorf("failed to create order: %w", err)
 	}
 
@@ -125,6 +128,7 @@ func (s *CheckoutService) CreateCheckoutSession(ctx context.Context, sessionID s
 func (s *CheckoutService) HandleWebhook(ctx context.Context, stripeSessionID, status string) error {
 	order, err := s.orderRepo.FindByStripeSessionID(ctx, stripeSessionID)
 	if err != nil {
+		fmt.Printf("CheckoutService: FindByStripeSessionID Error: %v\n", err)
 		return fmt.Errorf("order not found: %w", err)
 	}
 

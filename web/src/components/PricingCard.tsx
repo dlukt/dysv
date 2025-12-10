@@ -12,15 +12,13 @@ import { useTranslation } from '@/lib/i18n'
 interface PricingCardProps {
   plan: Plan
   billingCycle: 'monthly' | 'yearly'
-  isSelected?: boolean
-  onSelect: (planId: string) => void
+  onAdd: (planId: string) => void
 }
 
 export function PricingCard({
   plan,
   billingCycle,
-  isSelected = false,
-  onSelect,
+  onAdd,
 }: PricingCardProps) {
   const { t } = useTranslation()
   const isYearly = billingCycle === 'yearly'
@@ -36,7 +34,7 @@ export function PricingCard({
         relative flex flex-col rounded-2xl p-6
         backdrop-blur-xl bg-slate-800/40 border
         transition-all duration-300 hover:scale-[1.02]
-        ${isSelected ? 'border-cyan-400 shadow-lg shadow-cyan-500/20' : 'border-slate-700 hover:border-cyan-500/50'}
+        border-slate-700 hover:border-cyan-500/50
         ${isPopular ? 'ring-2 ring-cyan-400' : ''}
       `}
     >
@@ -80,17 +78,11 @@ export function PricingCard({
       </div>
 
       <Button
-        onClick={() => onSelect(plan.id)}
-        variant={isSelected ? 'default' : 'outline'}
-        className={`
-          w-full
-          ${isSelected
-            ? 'bg-cyan-500 hover:bg-cyan-600 text-white shadow-lg shadow-cyan-500/30'
-            : 'border-slate-600 hover:border-cyan-500 hover:text-cyan-400'
-          }
-        `}
+        onClick={() => onAdd(plan.id)}
+        variant="outline"
+        className="w-full border-slate-600 hover:border-cyan-500 hover:text-cyan-400"
       >
-        {isSelected ? t.pricing.card.selected : t.pricing.card.add_to_cart}
+        {t.pricing.card.add_to_cart}
       </Button>
     </div>
   )

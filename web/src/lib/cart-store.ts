@@ -5,32 +5,93 @@ import { Store } from '@tanstack/store'
 
 export type BillingCycle = 'monthly' | 'yearly'
 
+export interface CartItem {
+  id: string
+  type: 'plan' | 'addon'
+  quantity: number
+}
+
 export interface CartState {
-  planId: string | null
+  items: CartItem[]
   billingCycle: BillingCycle
-  addons: string[]
 }
 
 const initialState: CartState = {
-  planId: null,
+  items: [],
   billingCycle: 'monthly',
-  addons: [],
 }
 
 export const cartStore = new Store<CartState>(initialState)
 
-// Actions
-export function setPlan(planId: string) {
-  cartStore.setState((state) => ({
-    ...state,
-    planId,
-  }))
+// Persistence
+export function initPersistence() {
+  if (typeof window === 'undefined') return
+  console.log('Initializing persistence...')
+
+  // Load initial state
+  const saved = localStorage.getItem('dysv_cart')
+  if (saved) {
+    try {
+      const parsed = JSON.parse(saved)
+      console.log('Restoring cart from storage:', parsed)
+      cartStore.setState(() => parsed)
+    } catch (e) {
+      console.error('Failed to parse cart', e)
+    }
+  } else {
+    console.log('No saved cart found in storage')
+  }
+
+  // Save on change
+  cartStore.subscribe(() => {
+    const state = cartStore.state
+    console.log('Saving cart to storage:', state)
+    localStorage.setItem('dysv_cart', JSON.stringify(state))
+  })
 }
 
-export function clearPlan() {
+// Actions
+export function addToCart(id: string, type: 'plan' | 'addon') {
+  console.log('Action: addToCart', id, type)
+  cartStore.setState((state) => {
+    const existingItem = state.items.find((item) => item.id === id)
+    if (existingItem) {
+      return {
+        ...state,
+        items: state.items.map((item) =>
+          item.id === id ? { ...item, quantity: item.quantity + 1 } : item
+        ),
+      }
+    }
+    return {
+      ...state,
+      items: [...state.items, { id, type, quantity: 1 }],
+    }
+  })
+}
+
+export function updateQuantity(id: string, quantity: number) {
+  console.log('Action: updateQuantity', id, quantity)
+  cartStore.setState((state) => {
+    if (quantity <= 0) {
+      return {
+        ...state,
+        items: state.items.filter((item) => item.id !== id),
+      }
+    }
+    return {
+      ...state,
+      items: state.items.map((item) =>
+        item.id === id ? { ...item, quantity } : item
+      ),
+    }
+  })
+}
+
+export function removeFromCart(id: string) {
   cartStore.setState((state) => ({
     ...state,
-    planId: null,
+    items: state.items.filter((item) => item.id !== id),
   }))
 }
 
@@ -41,40 +102,19 @@ export function setBillingCycle(cycle: BillingCycle) {
   }))
 }
 
-export function addAddon(addonId: string) {
-  cartStore.setState((state) => ({
-    ...state,
-    addons: state.addons.includes(addonId)
-      ? state.addons
-      : [...state.addons, addonId],
-  }))
-}
-
-export function removeAddon(addonId: string) {
-  cartStore.setState((state) => ({
-    ...state,
-    addons: state.addons.filter((id) => id !== addonId),
-  }))
-}
-
-export function toggleAddon(addonId: string) {
-  cartStore.setState((state) => ({
-    ...state,
-    addons: state.addons.includes(addonId)
-      ? state.addons.filter((id) => id !== addonId)
-      : [...state.addons, addonId],
-  }))
-}
-
 export function clearCart() {
   cartStore.setState(() => initialState)
 }
 
 // Selectors
 export function hasItems(state: CartState): boolean {
-  return state.planId !== null || state.addons.length > 0
+  return state.items.length > 0
 }
 
 export function getItemCount(state: CartState): number {
-  return (state.planId ? 1 : 0) + state.addons.length
+  return state.items.reduce((sum, item) => sum + item.quantity, 0)
+}
+
+export function getCartItem(state: CartState, id: string): CartItem | undefined {
+  return state.items.find((item) => item.id === id)
 }

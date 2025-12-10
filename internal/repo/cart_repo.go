@@ -6,8 +6,10 @@ package repo
 import (
 	"context"
 	"errors"
+	"fmt"
 	"time"
 
+	"github.com/davecgh/go-spew/spew"
 	"github.com/deicod/dysv/internal/model"
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"
@@ -41,6 +43,7 @@ func (r *CartRepo) FindBySessionID(ctx context.Context, sessionID string) (*mode
 		if errors.Is(err, mongo.ErrNoDocuments) {
 			return nil, ErrNotFound
 		}
+		fmt.Printf("Repo: FindBySessionID error: %v\n", err)
 		return nil, err
 	}
 	return &cart, nil
@@ -53,6 +56,7 @@ func (r *CartRepo) Create(ctx context.Context, cart *model.Cart) error {
 
 	result, err := r.coll.InsertOne(ctx, cart)
 	if err != nil {
+		fmt.Printf("Repo: Create error: %v\n", err)
 		return err
 	}
 	cart.ID = result.InsertedID.(bson.ObjectID)
@@ -64,7 +68,12 @@ func (r *CartRepo) Update(ctx context.Context, cart *model.Cart) error {
 	ctx, cancel := context.WithTimeout(ctx, r.timeout)
 	defer cancel()
 
+	spew.Dump("Repo Update Cart", cart)
+	// fmt.Printf("Repo: Updating cart %s\n", cart.ID.Hex())
 	_, err := r.coll.ReplaceOne(ctx, bson.M{"_id": cart.ID}, cart)
+	if err != nil {
+		fmt.Printf("Repo: ReplaceOne error: %v\n", err)
+	}
 	return err
 }
 
@@ -77,5 +86,8 @@ func (r *CartRepo) DeleteItem(ctx context.Context, cartID bson.ObjectID, itemID 
 		bson.M{"_id": cartID},
 		bson.M{"$pull": bson.M{"items": bson.M{"item_id": itemID}}},
 	)
+	if err != nil {
+		fmt.Printf("Repo: DeleteItem error: %v\n", err)
+	}
 	return err
 }

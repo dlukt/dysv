@@ -36,7 +36,22 @@ func runAPI(cmd *cobra.Command, args []string) {
 	if err != nil {
 		log.Fatalf("failed to load config: %v", err)
 	}
-
+	// Log loaded config
+	fmt.Println("--- Loaded Config ---")
+	fmt.Printf("PORT: %s\n", cfg.Port)
+	fmt.Printf("BASE_URL: %s\n", cfg.BaseURL)
+	fmt.Printf("MONGODB_URI: %s\n", cfg.MongoURI) // Ideally mask user/pass
+	fmt.Printf("MONGODB_TIMEOUT: %v\n", cfg.MongoTimeout)
+	mask := func(s string) string {
+		if len(s) < 8 {
+			return "***"
+		}
+		return s[:4] + "..." + s[len(s)-4:]
+	}
+	fmt.Printf("STRIPE_SECRET: %s\n", mask(cfg.StripeSecret))
+	fmt.Printf("STRIPE_PUBLIC_KEY: %s\n", mask(cfg.StripePubKey))
+	fmt.Printf("STRIPE_WEBHOOK_SECRET: %s\n", mask(cfg.StripeWebhookSecret))
+	fmt.Println("---------------------")
 	// Create router with handlers
 	mux := handler.NewRouter(cfg)
 

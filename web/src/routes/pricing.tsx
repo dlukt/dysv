@@ -1,4 +1,5 @@
 import { Link, createFileRoute } from '@tanstack/react-router'
+import { useState, useEffect } from 'react'
 import { useStore } from '@tanstack/react-store'
 import { ShoppingCart } from 'lucide-react'
 import { useTranslation } from '@/lib/i18n'
@@ -9,9 +10,9 @@ import { Button } from '@/components/ui/button'
 import { plans } from '@/data/pricing-data'
 import {
   cartStore,
-  setPlan,
+  addToCart,
   setBillingCycle,
-  toggleAddon,
+  removeFromCart,
   getItemCount,
 } from '@/lib/cart-store'
 
@@ -29,13 +30,30 @@ export function PricingPage() {
     setBillingCycle(checked ? 'yearly' : 'monthly')
   }
 
-  const handlePlanSelect = (planId: string) => {
-    setPlan(planId)
+  const handlePlanAdd = (planId: string) => {
+    addToCart(planId, 'plan')
   }
+
+  const hasDomain = cart.items.some((i) => i.id === 'de-domain')
+  const handleDomainToggle = (checked: boolean) => {
+    if (checked) {
+      addToCart('de-domain', 'addon')
+    } else {
+      removeFromCart('de-domain')
+    }
+  }
+
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900">
-      {/* Hero */}
+      {/* ... existing sections ... */}
+
+      {/* CTA */}
+
       <section className="py-16 px-6 text-center">
         <h1 className="text-4xl md:text-5xl font-black text-white mb-4">
           {t.pricing.hero.title}
@@ -66,7 +84,7 @@ export function PricingPage() {
         </div>
       </section>
 
-      {/* Pricing Cards - Internal content of PricingCard is not translated yet, passing props */}
+      {/* Pricing Cards */}
       <section className="px-6 max-w-6xl mx-auto">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {plans.map((plan) => (
@@ -74,8 +92,7 @@ export function PricingPage() {
               key={plan.id}
               plan={plan}
               billingCycle={cart.billingCycle}
-              isSelected={cart.planId === plan.id}
-              onSelect={handlePlanSelect}
+              onAdd={handlePlanAdd}
             />
           ))}
         </div>
@@ -96,25 +113,28 @@ export function PricingPage() {
           <div className="flex items-center gap-3">
             <span className="text-sm text-slate-400">{t.pricing.domain.label}</span>
             <Switch
-              checked={cart.addons.includes('de-domain')}
-              onCheckedChange={() => toggleAddon('de-domain')}
+              checked={hasDomain}
+              onCheckedChange={handleDomainToggle}
             />
           </div>
         </div>
       </section>
 
       {/* CTA */}
-      {cart.planId && (
-        <section className="py-8 px-6 text-center">
-          <Link to={cartPath}>
+      {/* Hydration fix: Only render CTA if we sure we are on client and state matches */}
+      {mounted && itemCount > 0 && (
+        <section className="py-8 px-6 text-center sticky bottom-0 z-50 pointer-events-none">
+          <div className="pointer-events-auto inline-block">
+             <Link to={cartPath}>
             <Button
               size="lg"
-              className="bg-cyan-500 hover:bg-cyan-600 text-white shadow-lg shadow-cyan-500/30 px-8"
+              className="bg-cyan-500 hover:bg-cyan-600 text-white shadow-lg shadow-cyan-500/30 px-8 animate-in fade-in slide-in-from-bottom-4 duration-300"
             >
               <ShoppingCart className="w-5 h-5 mr-2" />
               {t.pricing.cart_button.view} ({itemCount} {itemCount === 1 ? t.pricing.cart_button.item : t.pricing.cart_button.items})
             </Button>
           </Link>
+          </div>
         </section>
       )}
 

@@ -23,6 +23,8 @@ interface MyRouterContext {
 }
 
 import { NotFound } from '../components/NotFound'
+import { useEffect } from 'react'
+import { initPersistence } from '../lib/cart-store'
 
 export const Route = createRootRouteWithContext<MyRouterContext>()({
   head: () => ({
@@ -75,16 +77,25 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
   notFoundComponent: NotFound,
 })
 
+// ... existing imports
+
 function RootDocument({ children }: { children: React.ReactNode }) {
   const { pathname } = useRouterState({ select: (state) => state.location })
   const locale = getLocaleFromPath(pathname)
+
+  useEffect(() => {
+    initPersistence()
+  }, [])
+
 
   return (
     <html lang={locale}>
       <head>
         <HeadContent />
       </head>
-      <body>
+      <body
+        suppressHydrationWarning
+      >
         <Header />
         {children}
         {import.meta.env.DEV ? (
