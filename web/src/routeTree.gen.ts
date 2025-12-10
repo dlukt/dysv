@@ -24,6 +24,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as HrIndexRouteImport } from './routes/hr/index'
 import { Route as EnIndexRouteImport } from './routes/en/index'
 import { Route as DeIndexRouteImport } from './routes/de/index'
+import { Route as CheckoutIndexRouteImport } from './routes/checkout/index'
 import { Route as HrPricingRouteImport } from './routes/hr/pricing'
 import { Route as HrCartRouteImport } from './routes/hr/cart'
 import { Route as EnPricingRouteImport } from './routes/en/pricing'
@@ -108,6 +109,11 @@ const DeIndexRoute = DeIndexRouteImport.update({
   path: '/',
   getParentRoute: () => DeRoute,
 } as any)
+const CheckoutIndexRoute = CheckoutIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => CheckoutRoute,
+} as any)
 const HrPricingRoute = HrPricingRouteImport.update({
   id: '/pricing',
   path: '/pricing',
@@ -170,6 +176,7 @@ export interface FileRoutesByFullPath {
   '/en/pricing': typeof EnPricingRoute
   '/hr/cart': typeof HrCartRoute
   '/hr/pricing': typeof HrPricingRoute
+  '/checkout/': typeof CheckoutIndexRoute
   '/de/': typeof DeIndexRoute
   '/en/': typeof EnIndexRoute
   '/hr/': typeof HrIndexRoute
@@ -178,7 +185,6 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/agb': typeof AgbRoute
   '/cart': typeof CartRoute
-  '/checkout': typeof CheckoutRouteWithChildren
   '/datenschutz': typeof DatenschutzRoute
   '/impressum': typeof ImpressumRoute
   '/login': typeof LoginRoute
@@ -192,6 +198,7 @@ export interface FileRoutesByTo {
   '/en/pricing': typeof EnPricingRoute
   '/hr/cart': typeof HrCartRoute
   '/hr/pricing': typeof HrPricingRoute
+  '/checkout': typeof CheckoutIndexRoute
   '/de': typeof DeIndexRoute
   '/en': typeof EnIndexRoute
   '/hr': typeof HrIndexRoute
@@ -218,6 +225,7 @@ export interface FileRoutesById {
   '/en/pricing': typeof EnPricingRoute
   '/hr/cart': typeof HrCartRoute
   '/hr/pricing': typeof HrPricingRoute
+  '/checkout/': typeof CheckoutIndexRoute
   '/de/': typeof DeIndexRoute
   '/en/': typeof EnIndexRoute
   '/hr/': typeof HrIndexRoute
@@ -245,6 +253,7 @@ export interface FileRouteTypes {
     | '/en/pricing'
     | '/hr/cart'
     | '/hr/pricing'
+    | '/checkout/'
     | '/de/'
     | '/en/'
     | '/hr/'
@@ -253,7 +262,6 @@ export interface FileRouteTypes {
     | '/'
     | '/agb'
     | '/cart'
-    | '/checkout'
     | '/datenschutz'
     | '/impressum'
     | '/login'
@@ -267,6 +275,7 @@ export interface FileRouteTypes {
     | '/en/pricing'
     | '/hr/cart'
     | '/hr/pricing'
+    | '/checkout'
     | '/de'
     | '/en'
     | '/hr'
@@ -292,6 +301,7 @@ export interface FileRouteTypes {
     | '/en/pricing'
     | '/hr/cart'
     | '/hr/pricing'
+    | '/checkout/'
     | '/de/'
     | '/en/'
     | '/hr/'
@@ -420,6 +430,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DeIndexRouteImport
       parentRoute: typeof DeRoute
     }
+    '/checkout/': {
+      id: '/checkout/'
+      path: '/'
+      fullPath: '/checkout/'
+      preLoaderRoute: typeof CheckoutIndexRouteImport
+      parentRoute: typeof CheckoutRoute
+    }
     '/hr/pricing': {
       id: '/hr/pricing'
       path: '/pricing'
@@ -481,10 +498,12 @@ declare module '@tanstack/react-router' {
 
 interface CheckoutRouteChildren {
   CheckoutSuccessRoute: typeof CheckoutSuccessRoute
+  CheckoutIndexRoute: typeof CheckoutIndexRoute
 }
 
 const CheckoutRouteChildren: CheckoutRouteChildren = {
   CheckoutSuccessRoute: CheckoutSuccessRoute,
+  CheckoutIndexRoute: CheckoutIndexRoute,
 }
 
 const CheckoutRouteWithChildren = CheckoutRoute._addFileChildren(
