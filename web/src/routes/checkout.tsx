@@ -131,11 +131,15 @@ function CheckoutPage() {
   const checkoutMutation = useMutation({
     mutationFn: async () => {
       const token = localStorage.getItem('dysv_auth_token')
+      const sessionId = localStorage.getItem('dysv_session_id')
+      if (!sessionId) throw new Error('Session required')
+
       const res = await fetch('/api/checkout', {
         method: 'POST',
         headers: { 
             'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`
+            'Authorization': `Bearer ${token}`,
+            'X-Session-ID': sessionId
         },
         body: JSON.stringify({ addressId: selectedAddressId }),
       })

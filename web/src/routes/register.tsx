@@ -1,6 +1,8 @@
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
-import { useState, useId } from 'react'
-import { useAuth } from '../hooks/use-auth'
+import { useId } from 'react'
+import type { z } from 'zod'
+import { useForm } from '@tanstack/react-form'
+import { useAuth, RegisterSchema } from '../hooks/use-auth'
 import { Button } from '../components/ui/button'
 import { Input } from '../components/ui/input'
 import { Label } from '../components/ui/label'
@@ -9,83 +11,131 @@ export const Route = createFileRoute('/register')({
   component: RegisterComponent,
 })
 
+function validateWith<T>(schema: z.ZodType<T>) {
+  return ({ value }: { value: T }) => {
+    const result = schema.safeParse(value)
+    if (result.success) return undefined
+    return result.error.issues[0].message
+  }
+}
+
 function RegisterComponent() {
   const navigate = useNavigate()
   const { register } = useAuth()
   const id = useId()
   
-  const [username, setUsername] = useState('')
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [error, setError] = useState('')
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setError('')
-    
-    try {
-      await register.mutateAsync({ username, email, password })
-      // Redirect to home or dashboard
-      navigate({ to: '/' })
-    } catch (err) {
-      const message = err instanceof Error ? err.message : 'Failed to register'
-      setError(message)
-    }
-  }
+  const form = useForm({
+    defaultValues: {
+      username: '',
+      email: '',
+      password: '',
+    },
+    onSubmit: async ({ value }) => {
+        await register.mutateAsync(value)
+        navigate({ to: '/' })
+    },
+  })
 
   return (
     <div className="container mx-auto max-w-md py-20 px-4">
       <div className="rounded-lg border bg-card p-8 shadow-sm">
         <h1 className="text-2xl font-bold mb-6 text-center">Create Account</h1>
         
-        {error && (
+        {register.error && (
           <div className="bg-red-50 text-red-600 p-3 rounded mb-4 text-sm">
-            {error}
+            {register.error.message || 'Failed to register'}
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor={`${id}-username`}>Username</Label>
-            <Input
-              id={`${id}-username`}
-              type="text"
-              placeholder="johndoe"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              required
-              minLength={3}
-            />
-          </div>
+        <form 
+            onSubmit={(e) => {
+                e.preventDefault()
+                e.stopPropagation()
+                form.handleSubmit()
+            }}
+            className="space-y-4"
+        >
+          <form.Field
+            name="username"
+            validators={{ onChange: validateWith(RegisterSchema.shape.username) }}
+          >
+            {(field) => (
+                <div className="space-y-2">
+                    <Label htmlFor={`${id}-username`}>Username</Label>
+                    <Input
+                        id={`${id}-username`}
+                        name={field.name}
+                        type="text"
+                        placeholder="johndoe"
+                        value={field.state.value}
+                        onBlur={field.handleBlur}
+                        onChange={(e) => field.handleChange(e.target.value)}
+                        required
+                    />
+                     {field.state.meta.errors ? (
+                        <p className="text-xs text-red-500">{field.state.meta.errors.join(', ')}</p>
+                    ) : null}
+                </div>
+            )}
+          </form.Field>
 
-          <div className="space-y-2">
-            <Label htmlFor={`${id}-email`}>Email</Label>
-            <Input
-              id={`${id}-email`}
-              type="email"
-              placeholder="you@example.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
-          </div>
+          <form.Field
+            name="email"
+            validators={{ onChange: validateWith(RegisterSchema.shape.email) }}
+          >
+            {(field) => (
+                <div className="space-y-2">
+                    <Label htmlFor={`${id}-email`}>Email</Label>
+                    <Input
+                        id={`${id}-email`}
+                        name={field.name}
+                        type="email"
+                        placeholder="you@example.com"
+                        value={field.state.value}
+                        onBlur={field.handleBlur}
+                        onChange={(e) => field.handleChange(e.target.value)}
+                        required
+                    />
+                     {field.state.meta.errors ? (
+                        <p className="text-xs text-red-500">{field.state.meta.errors.join(', ')}</p>
+                    ) : null}
+                </div>
+            )}
+          </form.Field>
           
-          <div className="space-y-2">
-            <Label htmlFor={`${id}-password`}>Password</Label>
-            <Input
-              id={`${id}-password`}
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              minLength={8}
-            />
-            <p className="text-xs text-gray-500">Must be at least 8 characters long</p>
-          </div>
+          <form.Field
+            name="password"
+            validators={{ onChange: validateWith(RegisterSchema.shape.password) }}
+          >
+            {(field) => (
+                <div className="space-y-2">
+                    <Label htmlFor={`${id}-password`}>Password</Label>
+                    <Input
+                        id={`${id}-password`}
+                        name={field.name}
+                        type="password"
+                        value={field.state.value}
+                        onBlur={field.handleBlur}
+                        onChange={(e) => field.handleChange(e.target.value)}
+                        required
+                    />
+                     {field.state.meta.errors ? (
+                        <p className="text-xs text-red-500">{field.state.meta.errors.join(', ')}</p>
+                    ) : null}
+                     <p className="text-xs text-gray-500">Must be at least 8 characters long</p>
+                </div>
+            )}
+          </form.Field>
 
-          <Button type="submit" className="w-full" disabled={register.isPending}>
-            {register.isPending ? 'Creating Account...' : 'Sign Up'}
-          </Button>
+          <form.Subscribe
+            selector={(state) => [state.canSubmit, state.isSubmitting]}
+          >
+            {([canSubmit, isSubmitting]) => (
+                <Button type="submit" className="w-full" disabled={!canSubmit || isSubmitting || register.isPending}>
+                    {isSubmitting || register.isPending ? 'Creating Account...' : 'Sign Up'}
+                </Button>
+            )}
+          </form.Subscribe>
         </form>
 
         <div className="mt-6 text-center text-sm text-gray-500">
