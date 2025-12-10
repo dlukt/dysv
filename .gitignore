@@ -1,1 +1,14 @@
 .idea
+web/node_modules
+web/.DS_Store
+web/dist
+web/dist-ssr
+web/*.local
+web/count.txt
+web/.env
+web/.nitro
+web/.tanstack
+web/.wrangler
+web/.output
+web/.vinxi
+web/todos.json
