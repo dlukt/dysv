@@ -1,118 +1,191 @@
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, Link } from '@tanstack/react-router'
 import {
-  Zap,
   Server,
-  Route as RouteIcon,
   Shield,
-  Waves,
-  Sparkles,
+  Zap,
+  Globe,
+  Clock,
+  ArrowRight,
 } from 'lucide-react'
 
-export const Route = createFileRoute('/')({ component: App })
+import { Button } from '@/components/ui/button'
+import { useTranslation } from '@/lib/i18n'
 
-function App() {
+export const Route = createFileRoute('/')({
+  component: LandingPage,
+})
+
+export function LandingPage() {
+  const { t, locale } = useTranslation()
+  const pricingPath = locale === 'de' ? '/pricing' : `/${locale}/pricing`
+
   const features = [
     {
-      icon: <Zap className="w-12 h-12 text-cyan-400" />,
-      title: 'Powerful Server Functions',
-      description:
-        'Write server-side code that seamlessly integrates with your client components. Type-safe, secure, and simple.',
+      icon: <Server className="w-10 h-10 text-cyan-400" />,
+      title: t.landing.features.server_title,
+      description: t.landing.features.server_desc,
     },
     {
-      icon: <Server className="w-12 h-12 text-cyan-400" />,
-      title: 'Flexible Server Side Rendering',
-      description:
-        'Full-document SSR, streaming, and progressive enhancement out of the box. Control exactly what renders where.',
+      icon: <Shield className="w-10 h-10 text-cyan-400" />,
+      title: t.landing.features.k8s_title,
+      description: t.landing.features.k8s_desc,
     },
     {
-      icon: <RouteIcon className="w-12 h-12 text-cyan-400" />,
-      title: 'API Routes',
-      description:
-        'Build type-safe API endpoints alongside your application. No separate backend needed.',
+      icon: <Zap className="w-10 h-10 text-cyan-400" />,
+      title: t.landing.features.nvme_title,
+      description: t.landing.features.nvme_desc,
     },
     {
-      icon: <Shield className="w-12 h-12 text-cyan-400" />,
-      title: 'Strongly Typed Everything',
-      description:
-        'End-to-end type safety from server to client. Catch errors before they reach production.',
+      icon: <Globe className="w-10 h-10 text-cyan-400" />,
+      title: t.landing.features.geo_title,
+      description: t.landing.features.geo_desc,
     },
     {
-      icon: <Waves className="w-12 h-12 text-cyan-400" />,
-      title: 'Full Streaming Support',
-      description:
-        'Stream data from server to client progressively. Perfect for AI applications and real-time updates.',
+      icon: <Clock className="w-10 h-10 text-cyan-400" />,
+      title: t.landing.features.pricing_title,
+      description: t.landing.features.pricing_desc,
     },
     {
-      icon: <Sparkles className="w-12 h-12 text-cyan-400" />,
-      title: 'Next Generation Ready',
-      description:
-        'Built from the ground up for modern web applications. Deploy anywhere JavaScript runs.',
+      icon: <Shield className="w-10 h-10 text-cyan-400" />,
+      title: t.landing.features.ssl_title,
+      description: t.landing.features.ssl_desc,
     },
   ]
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900">
-      <section className="relative py-20 px-6 text-center overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/10 via-blue-500/10 to-purple-500/10"></div>
-        <div className="relative max-w-5xl mx-auto">
-          <div className="flex items-center justify-center gap-6 mb-6">
-            <img
-              src="/tanstack-circle-logo.png"
-              alt="TanStack Logo"
-              className="w-24 h-24 md:w-32 md:h-32"
-            />
-            <h1 className="text-6xl md:text-7xl font-black text-white [letter-spacing:-0.08em]">
-              <span className="text-gray-300">TANSTACK</span>{' '}
-              <span className="bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent">
-                START
-              </span>
-            </h1>
+      {/* Hero */}
+      <section className="relative py-24 px-6 text-center overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/5 via-blue-500/5 to-purple-500/5" />
+        <div className="relative max-w-4xl mx-auto">
+          <p className="text-cyan-400 font-mono text-sm mb-4 tracking-widest uppercase">
+            {t.landing.hero.surtitle}
+          </p>
+          <h1 className="text-5xl md:text-7xl font-black text-white mb-6 leading-tight">
+            <span className="bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent">
+              {t.landing.hero.title_line1}
+            </span>
+            <br />
+            {t.landing.hero.title_line2}
+          </h1>
+          <p className="text-xl md:text-2xl text-slate-300 mb-4 max-w-2xl mx-auto">
+            {t.landing.hero.subtitle}
+          </p>
+          <p className="text-lg text-slate-400 mb-6 max-w-xl mx-auto">
+            {t.landing.hero.description}
+          </p>
+
+          {/* Framework Logos/Names - Keeping English/Technical terms */}
+          <div className="flex flex-wrap items-center justify-center gap-3 mb-10 text-sm">
+             {/* ... */}
+            <span className="px-3 py-1.5 bg-slate-800/80 border border-slate-700 rounded-full text-slate-300">Next.js</span>
+            <span className="px-3 py-1.5 bg-slate-800/80 border border-slate-700 rounded-full text-slate-300">Nuxt</span>
+            <span className="px-3 py-1.5 bg-slate-800/80 border border-slate-700 rounded-full text-slate-300">Remix</span>
+            <span className="px-3 py-1.5 bg-slate-800/80 border border-slate-700 rounded-full text-slate-300">Astro</span>
+            <span className="px-3 py-1.5 bg-slate-800/80 border border-slate-700 rounded-full text-slate-300">SvelteKit</span>
+            <span className="px-3 py-1.5 bg-slate-800/80 border border-slate-700 rounded-full text-slate-300">React</span>
+            <span className="px-3 py-1.5 bg-slate-800/80 border border-slate-700 rounded-full text-slate-300">Vue</span>
+            <span className="px-3 py-1.5 bg-slate-800/80 border border-slate-700 rounded-full text-slate-300">Angular</span>
           </div>
-          <p className="text-2xl md:text-3xl text-gray-300 mb-4 font-light">
-            The framework for next generation AI applications
-          </p>
-          <p className="text-lg text-gray-400 max-w-3xl mx-auto mb-8">
-            Full-stack framework powered by TanStack Router for React and Solid.
-            Build modern applications with server functions, streaming, and type
-            safety.
-          </p>
-          <div className="flex flex-col items-center gap-4">
-            <a
-              href="https://tanstack.com/start"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="px-8 py-3 bg-cyan-500 hover:bg-cyan-600 text-white font-semibold rounded-lg transition-colors shadow-lg shadow-cyan-500/50"
-            >
-              Documentation
-            </a>
-            <p className="text-gray-400 text-sm mt-2">
-              Begin your TanStack Start journey by editing{' '}
-              <code className="px-2 py-1 bg-slate-700 rounded text-cyan-400">
-                /src/routes/index.tsx
-              </code>
-            </p>
+
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <Link to={pricingPath}>
+              <Button
+                size="lg"
+                className="bg-cyan-500 hover:bg-cyan-600 text-white shadow-lg shadow-cyan-500/30 px-8"
+              >
+                {t.landing.hero.cta}
+                <ArrowRight className="w-5 h-5 ml-2" />
+              </Button>
+            </Link>
+            <p className="text-slate-500 text-sm">{t.landing.hero.starting_at}</p>
           </div>
         </div>
       </section>
 
-      <section className="py-16 px-6 max-w-7xl mx-auto">
+      {/* Trust Bar */}
+      <section className="py-8 px-6 border-y border-slate-700/50">
+        <div className="max-w-5xl mx-auto flex flex-wrap items-center justify-center gap-8 md:gap-16 text-center">
+          <div>
+            <p className="text-2xl font-bold text-white">99.9%</p>
+            <p className="text-xs text-slate-500 uppercase tracking-wide">{t.landing.trust.sla}</p>
+          </div>
+          <div>
+            <p className="text-2xl font-bold text-white">🇩🇪</p>
+            <p className="text-xs text-slate-500 uppercase tracking-wide">{t.landing.trust.location}</p>
+          </div>
+          <div>
+            <p className="text-2xl font-bold text-white">GDPR</p>
+            <p className="text-xs text-slate-500 uppercase tracking-wide">{t.landing.trust.compliant}</p>
+          </div>
+        </div>
+      </section>
+
+      {/* Features */}
+      <section className="py-20 px-6 max-w-7xl mx-auto">
+        <div className="text-center mb-16">
+          <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
+            {t.landing.dev_section.title}
+          </h2>
+          <p className="text-lg text-slate-400 max-w-2xl mx-auto">
+            {t.landing.dev_section.description}
+          </p>
+        </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {features.map((feature, index) => (
+          {features.map((feature) => (
             <div
-              key={index}
-              className="bg-slate-800/50 backdrop-blur-sm border border-slate-700 rounded-xl p-6 hover:border-cyan-500/50 transition-all duration-300 hover:shadow-lg hover:shadow-cyan-500/10"
+              key={feature.title}
+              className="bg-slate-800/50 backdrop-blur-sm border border-slate-700 rounded-xl p-6 hover:border-cyan-500/50 transition-all duration-300"
             >
               <div className="mb-4">{feature.icon}</div>
-              <h3 className="text-xl font-semibold text-white mb-3">
+              <h3 className="text-xl font-semibold text-white mb-2">
                 {feature.title}
               </h3>
-              <p className="text-gray-400 leading-relaxed">
-                {feature.description}
-              </p>
+              <p className="text-slate-400">{feature.description}</p>
             </div>
           ))}
         </div>
       </section>
+
+      {/* CTA */}
+      <section className="py-20 px-6">
+        <div className="max-w-4xl mx-auto text-center bg-gradient-to-r from-cyan-500/10 to-blue-500/10 border border-cyan-500/20 rounded-2xl p-12">
+          <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
+            {t.landing.cta_section.title}
+          </h2>
+          <p className="text-lg text-slate-300 mb-8 max-w-xl mx-auto">
+            {t.landing.cta_section.description}
+          </p>
+          <Link to={pricingPath}>
+            <Button
+              size="lg"
+              className="bg-cyan-500 hover:bg-cyan-600 text-white shadow-lg shadow-cyan-500/30 px-10"
+            >
+              {t.landing.cta_section.button}
+            </Button>
+          </Link>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="py-12 px-6 border-t border-slate-700/50">
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
+          <div className="text-slate-400 text-sm">
+            © 2025 dysv.de. {t.landing.footer.rights}
+          </div>
+          <nav className="flex items-center gap-6 text-sm">
+            <Link to="/impressum" className="text-slate-400 hover:text-white transition-colors">
+              Impressum
+            </Link>
+            <Link to="/datenschutz" className="text-slate-400 hover:text-white transition-colors">
+              Datenschutz
+            </Link>
+            <Link to="/agb" className="text-slate-400 hover:text-white transition-colors">
+              AGB
+            </Link>
+          </nav>
+        </div>
+      </footer>
     </div>
   )
 }

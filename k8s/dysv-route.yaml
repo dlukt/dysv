@@ -1,0 +1,32 @@
+# dysv HTTPRoute for Nginx Gateway Fabric
+# Routes /api/* to backend, /* to frontend
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: dysv-route
+  namespace: dysv
+spec:
+  parentRefs:
+    - name: public
+      namespace: nginx-gateway
+  hostnames:
+    - "dysv.de"
+    - "www.dysv.de"
+  rules:
+    # 1. API Traffic -> Go Backend
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /api
+      backendRefs:
+        - name: dysv-api
+          port: 8080
+
+    # 2. All other traffic -> Web Frontend
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      backendRefs:
+        - name: dysv-web
+          port: 3000

@@ -1,0 +1,79 @@
+# dysv API Deployment and Service
+# Go backend built with ko
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dysv-api
+  namespace: dysv
+  labels:
+    app: dysv-api
+spec:
+  replicas: 3  # 3-node redundancy
+  selector:
+    matchLabels:
+      app: dysv-api
+  template:
+    metadata:
+      labels:
+        app: dysv-api
+    spec:
+      containers:
+        - name: api
+          image: ko://github.com/deicod/dysv
+          args: ["api"]
+          ports:
+            - containerPort: 8080
+              name: http
+          env:
+            - name: PORT
+              value: "8080"
+            - name: MONGODB_URI
+              valueFrom:
+                secretKeyRef:
+                  name: dysv-secrets
+                  key: mongodb-uri
+            - name: STRIPE_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: dysv-secrets
+                  key: stripe-secret
+          resources:
+            # Pro Plan profile (Dedicated Core Performance)
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "256Mi"
+          livenessProbe:
+            httpGet:
+              path: /api/health
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /api/health
+              port: 8080
+            initialDelaySeconds: 3
+            periodSeconds: 5
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: DoNotSchedule
+          labelSelector:
+            matchLabels:
+              app: dysv-api
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: dysv-api
+  namespace: dysv
+spec:
+  selector:
+    app: dysv-api
+  ports:
+    - port: 8080
+      targetPort: 8080
+      name: http
