@@ -1,0 +1,14 @@
+# Ko Build Configuration for dysv API
+# Build with: ko build ./cmd/... -B
+
+defaultBaseImage: cgr.dev/chainguard/static:latest
+
+builds:
+  - id: dysv-api
+    main: ./
+    env:
+      - GOFLAGS=-trimpath
+      - CGO_ENABLED=0
+    ldflags:
+      - -s
+      - -w
