@@ -48,6 +48,10 @@ func (s *AddressService) ListAddresses(ctx context.Context, userID string) ([]mo
 	return s.repo.ListByUserID(ctx, userID)
 }
 
+func (s *AddressService) GetAddress(ctx context.Context, id, userID string) (*model.Address, error) {
+	return s.repo.Get(ctx, id, userID)
+}
+
 func (s *AddressService) DeleteAddress(ctx context.Context, id, userID string) error {
 	return s.repo.Delete(ctx, id, userID)
 }

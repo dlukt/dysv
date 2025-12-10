@@ -4,11 +4,13 @@ Copyright © 2025 Darko Luketic <info@icod.de>
 package handler
 
 import (
+	"encoding/json"
 	"errors"
 	"io"
 	"log"
 	"net/http"
 
+	"github.com/deicod/auth"
 	"github.com/deicod/dysv/internal/service"
 	"github.com/stripe/stripe-go/v82/webhook"
 )
@@ -16,17 +18,23 @@ import (
 // CheckoutHandler handles checkout-related HTTP requests
 type CheckoutHandler struct {
 	checkoutService  *service.CheckoutService
+	auth             auth.Service
 	webhookSecret    string
 	stripeAPIVersion string
 }
 
 // NewCheckoutHandler creates a new checkout handler
-func NewCheckoutHandler(checkoutService *service.CheckoutService, webhookSecret, stripeAPIVersion string) *CheckoutHandler {
+func NewCheckoutHandler(checkoutService *service.CheckoutService, auth auth.Service, webhookSecret, stripeAPIVersion string) *CheckoutHandler {
 	return &CheckoutHandler{
 		checkoutService:  checkoutService,
+		auth:             auth,
 		webhookSecret:    webhookSecret,
 		stripeAPIVersion: stripeAPIVersion,
 	}
+}
+
+type CreateCheckoutSessionRequest struct {
+	AddressID string `json:"addressId"`
 }
 
 // CreateCheckoutSession handles POST /api/checkout
@@ -37,7 +45,32 @@ func (h *CheckoutHandler) CreateCheckoutSession(w http.ResponseWriter, r *http.R
 		return
 	}
 
-	checkoutURL, err := h.checkoutService.CreateCheckoutSession(r.Context(), sessionID)
+	// Get User ID from Token
+	token := getToken(r) // helper from auth_handler (need to make it shared or duplicate)
+	// getToken is likely in utils or same package if handlers are in same package.
+	// They are in `package handler`, so `getToken` is shared if valid.
+	if token == "" {
+		writeError(w, http.StatusUnauthorized, "unauthorized")
+		return
+	}
+	user, _, err := h.auth.AuthenticateSession(r.Context(), token)
+	if err != nil {
+		writeError(w, http.StatusUnauthorized, "authentication failed")
+		return
+	}
+
+	// Parse Body for AddressID
+	var req CreateCheckoutSessionRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		writeError(w, http.StatusBadRequest, "invalid request body")
+		return
+	}
+	if req.AddressID == "" {
+		writeError(w, http.StatusBadRequest, "addressId required")
+		return
+	}
+
+	checkoutURL, err := h.checkoutService.CreateCheckoutSession(r.Context(), sessionID, string(user.ID), req.AddressID)
 	if err != nil {
 		if errors.Is(err, service.ErrEmptyCart) {
 			log.Printf("CheckoutHandler: CreateCheckoutSession EmptyCart: %v", err)

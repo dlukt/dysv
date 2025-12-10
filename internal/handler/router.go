@@ -45,20 +45,17 @@ func NewRouter(cfg *config.Config) http.Handler {
 
 	if client != nil {
 		db := client.Database("dysv")
+
+		// Repositories
 		cartRepo := repo.NewCartRepo(db, cfg.MongoTimeout)
 		orderRepo := repo.NewOrderRepo(db, cfg.MongoTimeout)
+		addressRepo := repo.NewAddressRepo(db, cfg.MongoTimeout)
+
+		// Services
 		cartService := service.NewCartService(cartRepo)
-		cartHandler = NewCartHandler(cartService)
+		addressService := service.NewAddressService(addressRepo)
 
-		// Only enable checkout if Stripe is configured
-		if cfg.StripeSecret != "" {
-			successURL := cfg.BaseURL + "/checkout/success"
-			cancelURL := cfg.BaseURL + "/cart"
-			checkoutService := service.NewCheckoutService(cartService, orderRepo, cfg.StripeSecret, successURL, cancelURL)
-			checkoutHandler = NewCheckoutHandler(checkoutService, cfg.StripeWebhookSecret, cfg.StripeAPIVersion)
-		}
-
-		// Initialize Auth Service
+		// Auth Service Initialization
 		ac := auth.DefaultConfig()
 		ac.Backend = auth.BackendMongo
 		ac.Mongo = &mgo.Config{
@@ -67,7 +64,6 @@ func NewRouter(cfg *config.Config) http.Handler {
 			OperationTimeout: cfg.MongoTimeout,
 		}
 
-		// Configure email if provided
 		if cfg.AuthEmailHost != "" {
 			ac.Email.Host = cfg.AuthEmailHost
 			ac.Email.Port = cfg.AuthEmailPort
@@ -79,19 +75,31 @@ func NewRouter(cfg *config.Config) http.Handler {
 			ac.Email.From = cfg.AuthEmailFrom
 		}
 
-		// Use a separate context for auth service initialization if needed,
-		// but usually it uses the context for initial setup checks.
-		// Since Request Scope context is passed to methods, this is fine.
+		var authSvc auth.Service
 		authSvc, err := auth.NewService(context.Background(), ac)
 		if err != nil {
 			log.Printf("Error: Failed to initialize Auth Service: %v", err)
 		} else {
 			authHandler = NewAuthHandler(authSvc)
-
-			// Initialize Address Handler
-			addressRepo := repo.NewAddressRepo(db, cfg.MongoTimeout)
-			addressService := service.NewAddressService(addressRepo)
 			addressHandler = NewAddressHandler(addressService, authSvc)
+		}
+
+		// Handlers & Checkout Service
+		cartHandler = NewCartHandler(cartService)
+
+		if cfg.StripeSecret != "" {
+			successURL := cfg.BaseURL + "/checkout/success"
+			cancelURL := cfg.BaseURL + "/cart"
+			// CheckoutService needs AddressService
+			checkoutService := service.NewCheckoutService(cartService, orderRepo, addressService, cfg.StripeSecret, successURL, cancelURL)
+
+			// CheckoutHandler needs Auth Service (authSvc)
+			// Ensure authSvc is not nil
+			if authSvc != nil {
+				checkoutHandler = NewCheckoutHandler(checkoutService, authSvc, cfg.StripeWebhookSecret, cfg.StripeAPIVersion)
+			} else {
+				log.Println("Warning: CheckoutHandler disabled because Auth Service failed to initialize")
+			}
 		}
 	}
 

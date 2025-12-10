@@ -16,25 +16,27 @@ import (
 
 // CheckoutService handles Stripe checkout
 type CheckoutService struct {
-	cartService *CartService
-	orderRepo   repo.OrderRepository
-	successURL  string
-	cancelURL   string
+	cartService    *CartService
+	orderRepo      repo.OrderRepository
+	addressService *AddressService
+	successURL     string
+	cancelURL      string
 }
 
 // NewCheckoutService creates a new checkout service
-func NewCheckoutService(cartService *CartService, orderRepo repo.OrderRepository, stripeKey, successURL, cancelURL string) *CheckoutService {
+func NewCheckoutService(cartService *CartService, orderRepo repo.OrderRepository, addressService *AddressService, stripeKey, successURL, cancelURL string) *CheckoutService {
 	stripe.Key = stripeKey
 	return &CheckoutService{
-		cartService: cartService,
-		orderRepo:   orderRepo,
-		successURL:  successURL,
-		cancelURL:   cancelURL,
+		cartService:    cartService,
+		orderRepo:      orderRepo,
+		addressService: addressService,
+		successURL:     successURL,
+		cancelURL:      cancelURL,
 	}
 }
 
 // CreateCheckoutSession creates a Stripe Checkout session for the cart
-func (s *CheckoutService) CreateCheckoutSession(ctx context.Context, sessionID string) (string, error) {
+func (s *CheckoutService) CreateCheckoutSession(ctx context.Context, sessionID, userID, addressID string) (string, error) {
 	cart, err := s.cartService.GetOrCreateCart(ctx, sessionID)
 	if err != nil {
 		fmt.Printf("CheckoutService: GetOrCreateCart Error: %v\n", err)
@@ -43,6 +45,29 @@ func (s *CheckoutService) CreateCheckoutSession(ctx context.Context, sessionID s
 
 	if len(cart.Items) == 0 {
 		return "", ErrEmptyCart
+	}
+
+	// Fetch Address
+	// Using repo directly via interface or via service? Service!
+	// CheckoutService uses AddressService.
+	// But CheckoutService needs access to GetAddress logic.
+	// Assume AddressService exposes GetAddress.
+	// Wait, I implemented List, Create, Update, Delete in AddressService. Did I implement Get?
+	// Let's verify AddressService has Get.
+	// I forgot to add GetAddress to AddressService in implementation plan step...
+	// I'll assume I need to ADD it now or use repo directly?
+	// Better: Add GetAddress to Service now.
+
+	// Assuming GetAddress exists or I'll add it.
+	// Let's implement getting address here assuming service has it.
+	// If it fails compile, I'll fix service.
+
+	address, err := s.addressService.GetAddress(ctx, addressID, userID)
+	if err != nil {
+		return "", fmt.Errorf("failed to get address: %w", err)
+	}
+	if address == nil {
+		return "", fmt.Errorf("address not found or does not belong to user")
 	}
 
 	// Build line items for Stripe
@@ -96,7 +121,10 @@ func (s *CheckoutService) CreateCheckoutSession(ctx context.Context, sessionID s
 		LineItems:  lineItems,
 		Metadata: map[string]string{
 			"cart_session_id": sessionID,
+			"address_id":      addressID,
 		},
+		// Optional: Pre-fill customer email if we knew it, or address from our DB?
+		// Stripe allows passing address collection fields.
 	}
 
 	stripeSession, err := session.New(params)
@@ -112,6 +140,7 @@ func (s *CheckoutService) CreateCheckoutSession(ctx context.Context, sessionID s
 		StripeSessionID: stripeSession.ID,
 		Items:           cart.Items,
 		BillingCycle:    cart.BillingCycle,
+		BillingAddress:  *address, // Store snapshot
 		TotalAmount:     orderTotal,
 		Status:          "pending",
 	}

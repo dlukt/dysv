@@ -17,6 +17,7 @@ import { Route as HrRouteImport } from './routes/hr'
 import { Route as EnRouteImport } from './routes/en'
 import { Route as DeRouteImport } from './routes/de'
 import { Route as DatenschutzRouteImport } from './routes/datenschutz'
+import { Route as CheckoutRouteImport } from './routes/checkout'
 import { Route as CartRouteImport } from './routes/cart'
 import { Route as AgbRouteImport } from './routes/agb'
 import { Route as IndexRouteImport } from './routes/index'
@@ -70,6 +71,11 @@ const DeRoute = DeRouteImport.update({
 const DatenschutzRoute = DatenschutzRouteImport.update({
   id: '/datenschutz',
   path: '/datenschutz',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CheckoutRoute = CheckoutRouteImport.update({
+  id: '/checkout',
+  path: '/checkout',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CartRoute = CartRouteImport.update({
@@ -133,9 +139,9 @@ const DeCartRoute = DeCartRouteImport.update({
   getParentRoute: () => DeRoute,
 } as any)
 const CheckoutSuccessRoute = CheckoutSuccessRouteImport.update({
-  id: '/checkout/success',
-  path: '/checkout/success',
-  getParentRoute: () => rootRouteImport,
+  id: '/success',
+  path: '/success',
+  getParentRoute: () => CheckoutRoute,
 } as any)
 const AccountAddressesRoute = AccountAddressesRouteImport.update({
   id: '/account/addresses',
@@ -147,6 +153,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/agb': typeof AgbRoute
   '/cart': typeof CartRoute
+  '/checkout': typeof CheckoutRouteWithChildren
   '/datenschutz': typeof DatenschutzRoute
   '/de': typeof DeRouteWithChildren
   '/en': typeof EnRouteWithChildren
@@ -171,6 +178,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/agb': typeof AgbRoute
   '/cart': typeof CartRoute
+  '/checkout': typeof CheckoutRouteWithChildren
   '/datenschutz': typeof DatenschutzRoute
   '/impressum': typeof ImpressumRoute
   '/login': typeof LoginRoute
@@ -193,6 +201,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/agb': typeof AgbRoute
   '/cart': typeof CartRoute
+  '/checkout': typeof CheckoutRouteWithChildren
   '/datenschutz': typeof DatenschutzRoute
   '/de': typeof DeRouteWithChildren
   '/en': typeof EnRouteWithChildren
@@ -219,6 +228,7 @@ export interface FileRouteTypes {
     | '/'
     | '/agb'
     | '/cart'
+    | '/checkout'
     | '/datenschutz'
     | '/de'
     | '/en'
@@ -243,6 +253,7 @@ export interface FileRouteTypes {
     | '/'
     | '/agb'
     | '/cart'
+    | '/checkout'
     | '/datenschutz'
     | '/impressum'
     | '/login'
@@ -264,6 +275,7 @@ export interface FileRouteTypes {
     | '/'
     | '/agb'
     | '/cart'
+    | '/checkout'
     | '/datenschutz'
     | '/de'
     | '/en'
@@ -289,6 +301,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AgbRoute: typeof AgbRoute
   CartRoute: typeof CartRoute
+  CheckoutRoute: typeof CheckoutRouteWithChildren
   DatenschutzRoute: typeof DatenschutzRoute
   DeRoute: typeof DeRouteWithChildren
   EnRoute: typeof EnRouteWithChildren
@@ -298,7 +311,6 @@ export interface RootRouteChildren {
   PricingRoute: typeof PricingRoute
   RegisterRoute: typeof RegisterRoute
   AccountAddressesRoute: typeof AccountAddressesRoute
-  CheckoutSuccessRoute: typeof CheckoutSuccessRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -357,6 +369,13 @@ declare module '@tanstack/react-router' {
       path: '/datenschutz'
       fullPath: '/datenschutz'
       preLoaderRoute: typeof DatenschutzRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/checkout': {
+      id: '/checkout'
+      path: '/checkout'
+      fullPath: '/checkout'
+      preLoaderRoute: typeof CheckoutRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/cart': {
@@ -445,10 +464,10 @@ declare module '@tanstack/react-router' {
     }
     '/checkout/success': {
       id: '/checkout/success'
-      path: '/checkout/success'
+      path: '/success'
       fullPath: '/checkout/success'
       preLoaderRoute: typeof CheckoutSuccessRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof CheckoutRoute
     }
     '/account/addresses': {
       id: '/account/addresses'
@@ -459,6 +478,18 @@ declare module '@tanstack/react-router' {
     }
   }
 }
+
+interface CheckoutRouteChildren {
+  CheckoutSuccessRoute: typeof CheckoutSuccessRoute
+}
+
+const CheckoutRouteChildren: CheckoutRouteChildren = {
+  CheckoutSuccessRoute: CheckoutSuccessRoute,
+}
+
+const CheckoutRouteWithChildren = CheckoutRoute._addFileChildren(
+  CheckoutRouteChildren,
+)
 
 interface DeRouteChildren {
   DeCartRoute: typeof DeCartRoute
@@ -506,6 +537,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AgbRoute: AgbRoute,
   CartRoute: CartRoute,
+  CheckoutRoute: CheckoutRouteWithChildren,
   DatenschutzRoute: DatenschutzRoute,
   DeRoute: DeRouteWithChildren,
   EnRoute: EnRouteWithChildren,
@@ -515,7 +547,6 @@ const rootRouteChildren: RootRouteChildren = {
   PricingRoute: PricingRoute,
   RegisterRoute: RegisterRoute,
   AccountAddressesRoute: AccountAddressesRoute,
-  CheckoutSuccessRoute: CheckoutSuccessRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

@@ -169,24 +169,9 @@ export function CartPage() {
       const sessionId = getSessionId()
       await syncCartToBackend(sessionId)
 
-      const response = await fetch('/api/checkout', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Session-ID': sessionId,
-        },
-      })
-
-      if (!response.ok) {
-        const error = await response.json()
-        alert(`Checkout failed: ${error.error || 'Unknown error'}`)
-        return
-      }
-
-      const data = await response.json()
-      if (data.url) {
-        window.location.href = data.url
-      }
+      // Navigate to Checkout Page for Address Selection
+      navigate({ to: '/checkout' })
+      
     } catch (err: unknown) {
       const message =
         err instanceof Error ? err.message : 'Checkout failed. Please try again.'

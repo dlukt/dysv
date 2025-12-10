@@ -44,6 +44,7 @@ type Order struct {
 	CustomerEmail   string        `bson:"customer_email" json:"customerEmail"`
 	Items           []LineItem    `bson:"items" json:"items"`
 	BillingCycle    BillingCycle  `bson:"billing_cycle" json:"billingCycle"`
+	BillingAddress  Address       `bson:"billing_address" json:"billingAddress"`
 	TotalAmount     float64       `bson:"total_amount" json:"totalAmount"`
 	Status          string        `bson:"status" json:"status"` // pending, paid, cancelled
 	CreatedAt       time.Time     `bson:"created_at" json:"createdAt"`
