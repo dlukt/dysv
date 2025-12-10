@@ -56,9 +56,12 @@ export default function Header() {
       {user ? (
         <>
             <div className={`flex items-center gap-4 ${mobile ? 'flex-col items-start w-full' : ''}`}>
-                 <span className={`text-sm text-cyan-400 font-medium ${mobile ? 'py-1' : ''}`}>
+                 <Link 
+                    to="/account/addresses"
+                    className={`text-sm text-cyan-400 font-medium hover:text-cyan-300 transition-colors ${mobile ? 'py-1' : ''}`}
+                 >
                     {user.username}
-                 </span>
+                 </Link>
                  <button
                     onClick={() => logout()}
                     className={`text-slate-300 hover:text-white transition-colors ${mobile ? 'block py-2 text-lg w-full text-left' : ''}`}

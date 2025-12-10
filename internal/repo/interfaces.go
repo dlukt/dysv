@@ -24,3 +24,13 @@ type OrderRepository interface {
 	FindByStripeSessionID(ctx context.Context, stripeSessionID string) (*model.Order, error)
 	UpdateStatus(ctx context.Context, orderID bson.ObjectID, status string) error
 }
+
+// AddressRepository defines the interface for address persistence
+type AddressRepository interface {
+	Create(ctx context.Context, addr *model.Address) error
+	ListByUserID(ctx context.Context, userID string) ([]model.Address, error)
+	Get(ctx context.Context, id, userID string) (*model.Address, error)
+	Update(ctx context.Context, addr *model.Address) error
+	Delete(ctx context.Context, id, userID string) error
+	UnsetDefaults(ctx context.Context, userID string) error
+}

@@ -41,6 +41,7 @@ func NewRouter(cfg *config.Config) http.Handler {
 	var cartHandler *CartHandler
 	var checkoutHandler *CheckoutHandler
 	var authHandler *AuthHandler
+	var addressHandler *AddressHandler
 
 	if client != nil {
 		db := client.Database("dysv")
@@ -86,6 +87,11 @@ func NewRouter(cfg *config.Config) http.Handler {
 			log.Printf("Error: Failed to initialize Auth Service: %v", err)
 		} else {
 			authHandler = NewAuthHandler(authSvc)
+
+			// Initialize Address Handler
+			addressRepo := repo.NewAddressRepo(db, cfg.MongoTimeout)
+			addressService := service.NewAddressService(addressRepo)
+			addressHandler = NewAddressHandler(addressService, authSvc)
 		}
 	}
 
@@ -117,6 +123,14 @@ func NewRouter(cfg *config.Config) http.Handler {
 		mux.HandleFunc("POST /api/auth/forgot-password", authHandler.ForgotPassword)
 		mux.HandleFunc("POST /api/auth/reset-password", authHandler.ResetPassword)
 		mux.HandleFunc("GET /api/auth/me", authHandler.Me)
+	}
+
+	// Address endpoints
+	if addressHandler != nil {
+		mux.HandleFunc("GET /api/user/addresses", addressHandler.List)
+		mux.HandleFunc("POST /api/user/addresses", addressHandler.Create)
+		mux.HandleFunc("PUT /api/user/addresses/", addressHandler.Update)    // Trailing slash for ID parsing in handler? No.
+		mux.HandleFunc("DELETE /api/user/addresses/", addressHandler.Delete) // Handlers parse path manually
 	}
 
 	// Cart endpoints (require MongoDB)

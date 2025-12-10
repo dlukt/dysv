@@ -30,6 +30,7 @@ import { Route as EnCartRouteImport } from './routes/en/cart'
 import { Route as DePricingRouteImport } from './routes/de/pricing'
 import { Route as DeCartRouteImport } from './routes/de/cart'
 import { Route as CheckoutSuccessRouteImport } from './routes/checkout/success'
+import { Route as AccountAddressesRouteImport } from './routes/account/addresses'
 
 const RegisterRoute = RegisterRouteImport.update({
   id: '/register',
@@ -136,6 +137,11 @@ const CheckoutSuccessRoute = CheckoutSuccessRouteImport.update({
   path: '/checkout/success',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AccountAddressesRoute = AccountAddressesRouteImport.update({
+  id: '/account/addresses',
+  path: '/account/addresses',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -149,6 +155,7 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/pricing': typeof PricingRoute
   '/register': typeof RegisterRoute
+  '/account/addresses': typeof AccountAddressesRoute
   '/checkout/success': typeof CheckoutSuccessRoute
   '/de/cart': typeof DeCartRoute
   '/de/pricing': typeof DePricingRoute
@@ -169,6 +176,7 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/pricing': typeof PricingRoute
   '/register': typeof RegisterRoute
+  '/account/addresses': typeof AccountAddressesRoute
   '/checkout/success': typeof CheckoutSuccessRoute
   '/de/cart': typeof DeCartRoute
   '/de/pricing': typeof DePricingRoute
@@ -193,6 +201,7 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/pricing': typeof PricingRoute
   '/register': typeof RegisterRoute
+  '/account/addresses': typeof AccountAddressesRoute
   '/checkout/success': typeof CheckoutSuccessRoute
   '/de/cart': typeof DeCartRoute
   '/de/pricing': typeof DePricingRoute
@@ -218,6 +227,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/pricing'
     | '/register'
+    | '/account/addresses'
     | '/checkout/success'
     | '/de/cart'
     | '/de/pricing'
@@ -238,6 +248,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/pricing'
     | '/register'
+    | '/account/addresses'
     | '/checkout/success'
     | '/de/cart'
     | '/de/pricing'
@@ -261,6 +272,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/pricing'
     | '/register'
+    | '/account/addresses'
     | '/checkout/success'
     | '/de/cart'
     | '/de/pricing'
@@ -285,6 +297,7 @@ export interface RootRouteChildren {
   LoginRoute: typeof LoginRoute
   PricingRoute: typeof PricingRoute
   RegisterRoute: typeof RegisterRoute
+  AccountAddressesRoute: typeof AccountAddressesRoute
   CheckoutSuccessRoute: typeof CheckoutSuccessRoute
 }
 
@@ -437,6 +450,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CheckoutSuccessRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/account/addresses': {
+      id: '/account/addresses'
+      path: '/account/addresses'
+      fullPath: '/account/addresses'
+      preLoaderRoute: typeof AccountAddressesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -494,6 +514,7 @@ const rootRouteChildren: RootRouteChildren = {
   LoginRoute: LoginRoute,
   PricingRoute: PricingRoute,
   RegisterRoute: RegisterRoute,
+  AccountAddressesRoute: AccountAddressesRoute,
   CheckoutSuccessRoute: CheckoutSuccessRoute,
 }
 export const routeTree = rootRouteImport
