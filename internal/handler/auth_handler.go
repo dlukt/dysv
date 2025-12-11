@@ -5,6 +5,7 @@ package handler
 
 import (
 	"encoding/json"
+	"errors"
 	"net/http"
 	"strings"
 
@@ -122,13 +123,14 @@ func (h *AuthHandler) ForgotPassword(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := h.authService.ForgotPassword(r.Context(), cmd); err != nil {
-		// We generally don't want to leak if email exists or not, but the service error might be generic.
-		// If implementation returns UserNotFound, we should mask it.
-		// However, for this MVP, we might just return success always or log error.
-		// Let's assume handleAuthError handles it appropriate or we just return OK.
-		// Actually, standard practice: return OK regardless.
-		// But if DB is down, we want 500.
-		// For now, let's return OK.
+		// If user not found, we mask the error to prevent email enumeration
+		if errors.Is(err, core.ErrUserNotFound) {
+			// Do nothing, proceed to return success response
+		} else {
+			// Real error (e.g. DB connection), return 500
+			handleAuthError(w, err)
+			return
+		}
 	}
 
 	// Always return OK to prevent email enumeration

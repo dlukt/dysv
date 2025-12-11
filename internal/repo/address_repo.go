@@ -50,7 +50,7 @@ func (r *AddressRepo) ListByUserID(ctx context.Context, userID string) ([]model.
 	if err != nil {
 		return nil, err
 	}
-	defer cursor.Close(ctx)
+	defer func() { _ = cursor.Close(ctx) }()
 
 	var addresses []model.Address
 	if err := cursor.All(ctx, &addresses); err != nil {

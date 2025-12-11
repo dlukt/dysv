@@ -35,7 +35,7 @@ var _ = Describe("Router", func() {
 		mux.HandleFunc("GET /api/health", func(w http.ResponseWriter, r *http.Request) {
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusOK)
-			json.NewEncoder(w).Encode(map[string]string{"status": "ok"})
+			_ = json.NewEncoder(w).Encode(map[string]string{"status": "ok"})
 		})
 
 		// Plans endpoint (static data)
@@ -65,7 +65,7 @@ var _ = Describe("Router", func() {
 			}
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusOK)
-			json.NewEncoder(w).Encode(map[string]interface{}{"plans": plans})
+			_ = json.NewEncoder(w).Encode(map[string]interface{}{"plans": plans})
 		})
 	})
 
@@ -203,7 +203,7 @@ var _ = Describe("Cart Endpoints Validation", func() {
 				if sessionID == "" {
 					w.Header().Set("Content-Type", "application/json")
 					w.WriteHeader(http.StatusBadRequest)
-					json.NewEncoder(w).Encode(ErrorResponse{Error: "session_id required"})
+					_ = json.NewEncoder(w).Encode(ErrorResponse{Error: "session_id required"})
 					return
 				}
 				w.WriteHeader(http.StatusOK)
@@ -284,7 +284,7 @@ var _ = Describe("Cart Endpoints Validation", func() {
 				if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 					w.Header().Set("Content-Type", "application/json")
 					w.WriteHeader(http.StatusBadRequest)
-					json.NewEncoder(w).Encode(ErrorResponse{Error: "invalid JSON"})
+					_ = json.NewEncoder(w).Encode(ErrorResponse{Error: "invalid JSON"})
 					return
 				}
 				w.WriteHeader(http.StatusOK)
@@ -300,7 +300,8 @@ var _ = Describe("Cart Endpoints Validation", func() {
 			Expect(rec.Code).To(Equal(http.StatusBadRequest))
 
 			var errResp ErrorResponse
-			json.Unmarshal(rec.Body.Bytes(), &errResp)
+			err := json.Unmarshal(rec.Body.Bytes(), &errResp)
+			Expect(err).NotTo(HaveOccurred())
 			Expect(errResp.Error).To(Equal("invalid JSON"))
 		})
 	})
